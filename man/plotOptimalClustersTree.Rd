@@ -22,5 +22,4 @@ obj<-FindMaxHomoOptimalPartitions(DataT,gamma=0.05)
 # Plotting the result
 plotOptimalClustersTree(obj)
 
-
 }

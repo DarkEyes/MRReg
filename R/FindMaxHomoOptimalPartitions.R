@@ -10,21 +10,21 @@
 #'@param gamma is a threshold to ...
 #'@param insigThs is a threshold to determine whether a magnitude of a feature coefficient is enough so that the feature is designated as a selected feature.
 #'@param alpha is a significance level to determine whether a magnitude of a feature coefficient is enough so that the feature is designated as a selected feature.
-#'@param minInvs is a minimum number of individuals for a cluster to be considered for inferring η(C)cv, otherwise, η(C)cv=0 .
+#'@param minInvs is a minimum number of individuals for a cluster to be considered for inferring eta(C)cv, otherwise, eta(C)cv=0 .
 #'
 #'@return This function returns \code{Copt}, \code{models}, \code{nNodes},  \code{invOptCls}, and \code{minR2cv}.
 #'
-#' \item{ \code{Copt[p,1]}}{ is equal to \code{k} implies a cluster that is a pth member of the maximal homogeneous partition is at kth layer and the cluster name in kth layer is \code{Copt[p,2]} }
+#' \item{ \code{Copt[p,1]} }{ is equal to \code{k} implies a cluster that is a pth member of the maximal homogeneous partition is at kth layer and the cluster name in kth layer is \code{Copt[p,2]} }
 #' \item{ \code{Copt[p,3]} }{ is "Model Information Reduction Ratio" \code{I({C},H0,Hlin)} of \code{p}th member of the maximal homogeneous partition: positive means the linear model is better than the null model.}
-#' \item{ \code{Copt[p,4]} }{  is the squared correlation between predicted and real Y in CV step ( η(C)cv ) of pth member of the maximal homogeneous partition. The greater Copt[p,4], the higher homoheneous degree of this cluster.}
+#' \item{ \code{Copt[p,4]} }{  is the squared correlation between predicted and real Y in CV step ( eta(C)cv ) of pth member of the maximal homogeneous partition. The greater \code{Copt[p,4]}, the higher homoheneous degree of this cluster.}
 #' \item{ \code{ models[[k]][[j]]$clustInfoRecRatio} }{ is the "Cluster Information Reduction Ratio"  \code{I(Cj,Cjchildren,H)} between the \code{j}th cluster in \code{k}th layer
 #' and its children clusters in \code{(k+1)}th layer: positive means current cluster is better than its children clusters.
 #' Hence, we should keep this cluster at the member of maximal homogeneous partition instead of its children.}
 #' \item{ \code{models[[j]][[k]]} }{ is a linear model of a cluster ID \code{k} at the layer \code{j}.
-#'  The \code{models[[j]][[k]]$selFeatureSet represents a set of selected-feature indices of the model where the feature index 1 is the intercept,
-#'   and the feature index \code{d} is the (d-1)th variable \code{DataT$X[,d-1]}. }}
-#' \item{\code{invOptCls[i,1]} }{ is the layer of optimal cluster of individual \code{i}. The optimal cluster of \code{i} is \code{invOptCls[i,2]}. }
-#' \item{minR2cv}{ is the value of η(C)cv from the cluster that has the lowest η(C)cv.  }
+#'  The \code{models[[j]][[k]]$selFeatureSet} represents a set of selected-feature indices of the model where the feature index 1 is the intercept,
+#'   and the feature index \code{d} is the (d-1)th variable \code{DataT$X[,d-1]}. }
+#' \item{ \code{invOptCls[i,1]} }{ is the layer of optimal cluster of individual \code{i}. The optimal cluster of \code{i} is \code{invOptCls[i,2]}. }
+#' \item{minR2cv}{ is the value of eta(C)cv from the cluster that has the lowest eta(C)cv.  }
 #' \item{DataT}{is an updated \code{DataT} with the helper variables for plotting and printing results.}
 #'
 #'@examples
@@ -88,7 +88,7 @@ FindMaxHomoOptimalPartitions<-function(DataT,gamma=0.05,insigThs=1e-8,alpha=0.05
           #3 inxFilterVec #4 DataT, #5 models
           if(length(unique(clsInxVec))>1)
           {
-            R2cv<-crossValEstFunc(DataT$X[inxFilterVec,],DataT$Y[inxFilterVec],clsInxVec)$r2 # η_CV  the squared correlation between predicted and real Y in CV step.
+            R2cv<-crossValEstFunc(DataT$X[inxFilterVec,],DataT$Y[inxFilterVec],clsInxVec)$r2 # eta_CV  the squared correlation between predicted and real Y in CV step.
 
 
             for(chCls in models[[k]][[j]]$ChildrenCls)
@@ -115,7 +115,7 @@ FindMaxHomoOptimalPartitions<-function(DataT,gamma=0.05,insigThs=1e-8,alpha=0.05
 
           # end cross-validation
 
-          #Append Cj,k to C∗ if I(C′, {Cj,k },Hlin) > 0 and η(Cj,k )cv ≥ γ ;
+          #Append Cj,k to C∗ if I(C′, {Cj,k },Hlin) > 0 and eta(Cj,k )cv ≥ γ ;
           if(clustInfoRecRatio >0 && R2cv>=gamma )
           {
             minR2cv<-min(c(minR2cv,R2cv))
@@ -184,14 +184,14 @@ PrintOptimalClustersResult<-function(resObj, selFeature= FALSE)
   for(i in seq(1,M))
   {
     clsName<-models[[Copt[i,1]]][[Copt[i,2]]]$clsName
-    print(sprintf("Layer%d,ClS-%s:modelInfoRecRatio=%.2f, η(C)cv=%.2f",Copt[i,1],clsName,Copt[i,3],Copt[i,4]) )
+    print(sprintf("Layer%d,ClS-%s:modelInfoRecRatio=%.2f, eta(C)cv=%.2f",Copt[i,1],clsName,Copt[i,3],Copt[i,4]) )
     if(selFeature==TRUE)
     {
       print("Selected features")
       print(models[[Copt[i,1]]][[Copt[i,2]]]$selFeatureSet)
     }
   }
-  print(sprintf("min η(C)cv:%f",resObj$minR2cv))
+  print(sprintf("min eta(C)cv:%f",resObj$minR2cv))
   #print(Copt)
   #options( warn = 1 )
 }

@@ -15,7 +15,7 @@
 #'# Plotting the result
 #' plotOptimalClustersTree(obj)
 #'
-#'
+#'@importFrom graphics plot
 #'@import igraph
 #'@export
 #'
