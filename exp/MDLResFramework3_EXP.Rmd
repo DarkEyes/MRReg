@@ -1,0 +1,186 @@
+---
+title: "MDL Multiresolution Linear Regression Framework"
+output: html_notebook
+---
+#Experimental code 1: Greedy algorithm
+```{r}
+greedyAlgo<-function(DataT,out)
+{
+N<-length(DataT$Y)
+flagVec<-logical(N)
+nL<-dim(DataT$clsLayer)[2]
+Vc <-cbind(numeric(N),numeric(N))
+mSquareErr<-list()
+sortVec<-list()
+sortCls<-list()
+l<-1
+for(k in seq(1,nL) )
+{
+  currLayer<-unique(DataT$clsLayer[,k])
+  layerMSquareErr<-list()
+  for(j in seq(1,length(currLayer) ) )
+  {
+    sortVec[[l]]<-mean(out$models[[k]][[j]]$residuals^2)
+    sortCls[[l]]<-c(j,k)
+    l=l+1
+  }
+  
+}
+sortVec<-as.numeric(sortVec)
+orderVec<-order(sortVec)
+
+for(i in orderVec)
+{
+  currCls<-sortCls[[i]]
+  mark<-unique(DataT$clsLayer[,currCls[2]])
+  inxVec<-DataT$clsLayer[,currCls[2]] == mark[currCls[1] ]
+  if(sum(flagVec[inxVec])==0)
+  {
+    flagVec[inxVec]<-TRUE
+    k<-currCls[2] # Layer
+    j<-currCls[1] # Cls in Layer
+    Vc[inxVec,1]<-k
+    Vc[inxVec,2]<-j
+    
+    print(sprintf("Greedy: Layer%d, cls%d",k,j) )
+    if(is.null(out$models[[k]][[j]]$R2cv))
+    {
+      inxFilterVec<-DataT$clsLayer[,k] == j # selecting only members of jth cluster in ith layer
+      out$models[[k]][[j]]$R2cv<- crossVal10FoldEstFunc(DataT$X[inxFilterVec,],DataT$Y[inxFilterVec])$r2
+    }
+  }
+}
+CoptGreedy<-unique(Vc)
+return(list("Copt"=CoptGreedy,"out"=out))
+}
+```
+
+#Evaluation parts
+```{r}
+# support function
+getResidualFromCopt<-function(Copt,models)
+{
+  M<-dim(Copt)[1]
+  residuals<-list()
+  for(i in seq(1,M))
+  {
+    residuals<-append(residuals,models[[Copt[i,1]]][[Copt[i,2]]]$residuals)
+  }
+  return(list("residuals"=as.numeric(residuals) ) )
+}
+getPartitionFscore<-function(TrueCopt,Copt,clsLayer)
+{
+  # TrueCopt[k,j] 
+
+  TrueCopt<-matrix(TrueCopt,ncol=2)
+  #Copt<-matrix(Copt,ncol=4)
+  N1<-dim(TrueCopt)[1]
+  N2<-dim(Copt)[1]
+  TrueFlag<-logical(N1)
+  PredFlag<-logical(N2)
+  Fscore<-0
+  TP<-0
+  FP<-0
+  FN<-0
+  
+  for(i1 in seq(1,N1))
+  {
+    currTrCls<-TrueCopt[i1,1:2]
+    for(i2 in seq(1,N2))
+    {
+      currPdCls<-Copt[i2,1:2]
+      if( sum(currTrCls ==currPdCls) ==2 ) # true cls is in pred cls set
+      {
+        TrueFlag[i1] = TRUE
+        PredFlag[i2] = TRUE
+        break
+      }
+    }
+  }
+  # Find true positive and false negative
+  for(i1 in seq(1,N1))
+  {
+    currTrCls<-TrueCopt[i1,1:2]
+    if(TrueFlag[i1]==TRUE)
+    {
+      TP<-TP+ sum(clsLayer[,currTrCls[1]] == currTrCls[2])
+    }
+    else
+    {
+      FN<-FN+ sum(clsLayer[,currTrCls[1]] == currTrCls[2]) 
+    }
+  }
+  # Find  false positive
+  for(i2 in seq(1,N2))
+  {
+    currPdCls<-Copt[i2,1:2]
+   # print(currPdCls)
+    if(PredFlag[i2]==FALSE)
+    {
+      FP<-FP+ sum(clsLayer[,currPdCls[1]] == currPdCls[2])
+    }
+  }
+  
+  prcVal<-TP/(TP+FP)
+  recall<-TP/(TP+FN)
+  Fscore<-2*(prcVal*recall)/(recall+prcVal)
+  return(list("prcVal"=prcVal,"recall"=recall,"Fscore"=Fscore))
+}
+
+```
+
+#Code running block: the framework execution chunk starts here!
+instruction
+- Please run all chunks above (Ctrl+Alt+P)
+- Then set the parameter below (Input: DataT and gamma)
+- Run all chunks below to start the framwork
+
+Explanation: FindMaxHomoPartition(DataT,gamma)
+- INPUT: DataT$X[i,j] is the value of jth independent variable of ith individual. 
+- INPUT: DataT$Y[i] is the value of dependent variable of ith individual. 
+- INPUT: DataT$clsLayer[i,k] is the cluster label of ith individual in kth cluster layer.
+
+- OUTPUT: Copt[p,1] is equal to k means a cluster that is a pth member of the maximal homogeneous partition is at kth layer and the cluster name in kth layer is Copt[p,2]
+- OUTPUT: Copt[p,3] is "Model Information Reduction Ratio" of pth member of the maximal homogeneous partition: positive means the linear model is better than the null model.
+- OUTPUT: Copt[p,4] is $$R^2(C)_{\text{cv}}$$  of pth member of the maximal homogeneous partition. The greater Copt[p,4], the higher homoheneous degree of this cluster.
+- OUTPUT: models[[k]][[j]] is the linear regression model of jth cluster in kth layer.
+- OUTPUT: models[[k]][[j]]$clustInfoRecRatio is the "Cluster Information Reduction Ratio" between the jth cluster in kth layer and its children clusters in (k+1)th layer: positive means current cluster is better than its children clusters. Hence, we should keep this cluster at the member of maximal homogeneous partition instead of its children. 
+```{r}
+#========= Test 
+
+# DataT<-clusterSimpleGenT1Func(10000)
+# DataT<-clusterSimpleGenT2Func(10000)
+# DataT<-clusterSimpleGenT3Func(10000)
+#DataT<-clusterSimpleGenT4Func(10000) # Type of simulation datasets
+DataT<-SimpleSimulation(10000,type=4)
+
+gamma <- 0.05 # Gamma parameter
+
+out<-FindMaxHomoPartition(DataT,gamma)
+
+out2<-greedyAlgo(out$DataT,out)
+CoptGreedy<-out2$Copt
+out<-out2$out
+
+OPTresiduals<-getResidualFromCopt(out$Copt,out$models)$residuals
+GreedyResiduals<-getResidualFromCopt(CoptGreedy,out$models)$residuals
+RegResiduals<-out$models[[1]][[1]]$residuals
+H0Residuals<-DataT$Y - mean(DataT$Y)
+cat("\014") 
+print(sprintf("OPT Residuals: RMSE=%g",sqrt(mean(OPTresiduals^2)) ))
+print(sprintf("Greedy Residuals: RMSE=%g",sqrt(mean(GreedyResiduals^2)) ))
+print(sprintf("Reg Residuals: RMSE=%g",sqrt(mean(RegResiduals^2)) ))
+print(sprintf("\bar{Y} Residuals: RMSE=%g",sqrt(mean(H0Residuals^2)) ))
+#FscoreOut<-getPartitionFscore(DataT$GrTHCopt,out$Copt,DataT$clsLayer)
+```
+
+TEST: iGraph output distplay
+```{r}
+plotHomoPartitionTree(out)
+```
+
+
+```{r}
+PrintPartitionResult(out)
+```
+

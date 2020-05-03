@@ -1,0 +1,24 @@
+Package: MRReg
+Title: MDL Multiresolution Linear Regression Framework
+Version: 0.1.0
+Authors@R: 
+    person(given = "Chainarong",
+           family = "Amornbunchornvej",
+           role = c("aut", "cre"),
+           email = "grandca@gmail.com",
+           comment = c(ORCID = "0000-0003-3131-0370"))
+Maintainer: Chainarong Amornbunchornvej <grandca@gmail.com>
+Description: What the package does (one paragraph). The publication of this package is at Chainarong Amornbunchornvej, Navaporn Surasvadi, Anon Plangprasopchok, and Suttipong Thajchayapong (2019) <arXiv:1907.05234>.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Depends: 
+    R (>= 3.5.0)
+Imports:
+    igraph,
+    caret,
+    ggplot2 (>= 3.0)
+Roxygen: list(markdown = TRUE)
+Suggests: knitr, rmarkdown
+VignetteBuilder: knitr
+RoxygenNote: 7.1.0

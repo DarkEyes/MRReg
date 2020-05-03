@@ -1,0 +1,13 @@
+citHeader("To cite the 'MRReg' package in publications use:")
+
+citEntry(entry       = "Misc",
+         title       = "Identifying Linear Models in Multi-Resolution Population Data using Minimum Description Length Principle to Predict Household Income.",
+         author      = personList(as.person("Chainarong Amornbunchornvej"),
+                        as.person("Navaporn Surasvadi"),
+                        as.person("Anon Plangprasopchok"),
+                        as.person("Suttipong Thajchayapong")
+                        ),
+         year        = "2019",
+         url         = "https://arxiv.org/abs/1907.05234",
+         textVersion = "Chainarong Amornbunchornvej, Navaporn Surasvadi, Anon Plangprasopchok, and Suttipong Thajchayapong (2019). Identifying Linear Models in Multi-Resolution Population Data using Minimum Description Length Principle to Predict Household Income. arXiv preprint, arXiv:1907.05234."
+         )
