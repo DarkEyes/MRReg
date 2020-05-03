@@ -1,3 +1,15 @@
+#'@title  SimpleSimulation
+#'
+#'@description
+#' SimpleSimulation is a support function for generating multiresolution datasets.
+#'
+#'@param indvN is a number of individuals per cluster
+#'@param type is a type of simulation dataset. There are four types.
+#'
+#'@examples
+#'# Running SimpleSimulation to generate a dataset.
+#' DataT<-SimpleSimulation(100,type=1)
+#'
 #'
 #'@export
 #'

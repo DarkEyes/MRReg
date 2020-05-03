@@ -147,7 +147,8 @@ Explanation: FindMaxHomoPartition(DataT,gamma)
 - OUTPUT: models[[k]][[j]]$clustInfoRecRatio is the "Cluster Information Reduction Ratio" between the jth cluster in kth layer and its children clusters in (k+1)th layer: positive means current cluster is better than its children clusters. Hence, we should keep this cluster at the member of maximal homogeneous partition instead of its children. 
 ```{r}
 #========= Test 
-
+library(devtools)
+document()
 # DataT<-clusterSimpleGenT1Func(10000)
 # DataT<-clusterSimpleGenT2Func(10000)
 # DataT<-clusterSimpleGenT3Func(10000)
@@ -156,7 +157,7 @@ DataT<-SimpleSimulation(10000,type=4)
 
 gamma <- 0.05 # Gamma parameter
 
-out<-FindMaxHomoPartition(DataT,gamma)
+out<-FindMaxHomoOptimalPartitions(DataT,gamma)
 
 out2<-greedyAlgo(out$DataT,out)
 CoptGreedy<-out2$Copt
@@ -176,11 +177,11 @@ print(sprintf("\bar{Y} Residuals: RMSE=%g",sqrt(mean(H0Residuals^2)) ))
 
 TEST: iGraph output distplay
 ```{r}
-plotHomoPartitionTree(out)
+plotOptimalClustersTree(out)
 ```
 
 
 ```{r}
-PrintPartitionResult(out)
+PrintOptimalClustersResult(out)
 ```
 

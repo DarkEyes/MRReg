@@ -1,9 +1,25 @@
+#'@title  plotOptimalClustersTree
+#'
+#'@description
+#' plotOptimalClustersTree is a support function for plotting the hierarchical tree of optimal clusters
+#' from FindMaxHomoOptimalPartitions function.
+#'
+#' The red node(s) are the optimal homogeneous clusters while the grey nodes are non-optimal clusters.
+#'
+#'@param resObj is an object list, which is the output of FindMaxHomoOptimalPartitions function
+#'
+#'@examples
+#'# Running FindMaxHomoOptimalPartitions using simulation data
+#' DataT<-SimpleSimulation(100,type=1)
+#' obj<-FindMaxHomoOptimalPartitions(DataT,gamma=0.05)
+#'# Plotting the result
+#' plotOptimalClustersTree(obj)
 #'
 #'
 #'@import igraph
 #'@export
 #'
-plotHomoPartitionTree<-function(resObj)
+plotOptimalClustersTree<-function(resObj)
 {
 
   adjMat<- matrix(0,resObj$DataT$nNodes,resObj$DataT$nNodes)

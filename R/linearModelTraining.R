@@ -1,6 +1,28 @@
+#'@title  linearModelTraining
 #'
+#'@description
+#' linearModelTraining is a support function for training linear models for partitions in all layers.
 #'
+#'@param DataT contains a multiresolution dataset s.t.
+#' \code{DataT$X[i,d]} is a value of feature \code{d} of individual \code{i},
+#' \code{DataT$Y[i]} is value of target variable of individual \code{i} that we want to fit \code{DataT$Y ~ DataT$X} in linear model, and
+#' \code{clsLayer[i,j]} is a cluster ID of individual \code{i} at layer \code{j}; \code{clsLayer[i,1]} is the first layer that everyone typically belongs to a single cluster.
+#'@param insigThs is a threshold to determine whether a magnitude of a feature coefficient is enough so that the feature is designated as a selected feature.
+#'@param alpha is a significance level to determine whether a magnitude of a feature coefficient is enough so that the feature is designated as a selected feature.
 #'
+#'@return This function returns \code{models} and \code{DataT}.
+#'
+#' \item{ \code{models[[j]][[k]]} }{ is a linear model of a cluster ID \code{k} at the layer \code{j}.
+#'  The \code{models[[j]][[k]]$selFeatureSet represents a set of selected-feature indices of the model where the feature index 1 is the intercept,
+#'   and the feature index \code{d} is the (d-1)th variable \code{DataT$X[,d-1]}. }}
+#' \item{ DataT }{ is a \code{DataT} with \code{DataT$nNodes}, which is a number of total models from all layers. }
+#'
+#'@examples
+#'# Running linearModelTraining using simulation data
+#' DataT<-SimpleSimulation(100,type=1)
+#' obj<-linearModelTraining(DataT)
+#'
+#'@importFrom caret trainControl train
 #'@export
 #'
 linearModelTraining<-function(DataT,insigThs=1e-8,alpha=0.05)
@@ -48,8 +70,8 @@ linearModelTraining<-function(DataT,insigThs=1e-8,alpha=0.05)
 
       submodels[[inx2]]$optFlag<-FALSE
 
-      SelectedFeatures<- summary(submodels[[inx2]])$coefficients[,4] < alpha
-      sigFeature<- abs(summary(submodels[[inx2]])$coefficient[,1])>insigThs
+      SelectedFeatures<- summary(submodels[[inx2]])$coefficients[,4] <= alpha
+      sigFeature<- abs(summary(submodels[[inx2]])$coefficient[,1])>=insigThs
 
       SelectedFeatures<- SelectedFeatures & sigFeature
       selFeatureSet<-1:length(SelectedFeatures)
