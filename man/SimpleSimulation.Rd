@@ -7,12 +7,33 @@
 SimpleSimulation(indvN = 10000, type = 1)
 }
 \arguments{
-\item{indvN}{is a number of individuals per cluster}
+\item{indvN}{is a number of individuals per homogeneous partition.}
 
 \item{type}{is a type of simulation dataset. There are four types.}
 }
+\value{
+The function returns a multiresolution dataset.
+\item{\code{DataT$X[i,d]} }{ is a value of feature \code{d} of individual \code{i} }
+\item{\code{DataT$Y[i]} }{ is value of target variable of individual \code{i} that
+we want to fit \code{DataT$Y ~ DataT$X} in linear model}
+\item{\code{clsLayer[i,j]} }{ is a cluster ID of individual \code{i} at layer \code{j};
+\code{clsLayer[i,1]} is the first layer that everyone typically belongs to a single cluster. }
+\item{\code{DataT$TrueFeature[i]}}{ is equal to \code{d} if a true feature is \code{DataT$X[i,d-1]} that \code{DataT$Y[i]} is dependent with.
+Note that \code{d = 1} is reserved for the intercept value in a linear model. }
+}
 \description{
 SimpleSimulation is a support function for generating multiresolution datasets.
+
+All simulation types have three layers except the type 4 has four layers.
+
+The type-1 simulation has all individuals belong to the same homogeneous partition in the first layer.
+
+The type-2 simulation has four homogeneous partitions in a second layer. Each partition has its own models.
+
+The type-3 simulation has eight homogeneous partitions in a third layer. Each partition has its own models
+
+The type-4 simulation has one homogeneous partition in a second layer, four homogeneous partitions in a third layer,
+and eight homogeneous partitions in a fourth layer. Each partition has its own models
 }
 \examples{
 # Running SimpleSimulation to generate a dataset.

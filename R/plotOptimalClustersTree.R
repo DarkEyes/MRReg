@@ -4,7 +4,7 @@
 #' plotOptimalClustersTree is a support function for plotting the hierarchical tree of optimal clusters
 #' from FindMaxHomoOptimalPartitions function.
 #'
-#' The red node(s) are the optimal homogeneous clusters while the grey nodes are non-optimal clusters.
+#' The red node(s) are the optimal homogeneous clusters while the gray nodes are non-optimal clusters.
 #'
 #'@param resObj is an object list, which is the output of FindMaxHomoOptimalPartitions function
 #'

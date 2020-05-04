@@ -1,0 +1,59 @@
+---
+title: "MDL Multiresolution Linear Regression Framework"
+author: " C. Amornbunchornvej"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{MRReg_demo} 
+  %\VignetteEngine{knitr::knitr}
+  \usepackage[utf8]{inputenc}
+---
+
+MDL Multiresolution Linear Regression Framework
+===============================================
+In this work, we provide the framework to analyze a multiresolution partition (e.g. country, provinces, subdisctrict) where each individual data point belongs to only one partition in each layer (e.g. $i$ belongs to subdistrict $A$, province $P$, and country $Q$).
+
+We assume that a partition in a higher layer subsumes lower-layer partitions (e.g. a nation is at the 1st layer subsumes all provinces at the 2nd layer). 
+
+Given $N$ individuals that have a pair of real values $(x,y)$ that generated from  independent variable $X$ and dependent variable $Y$.
+Each individual $i$ belongs to one partition per layer.
+
+Our goal is to find which partition at which highest level that all individuals  in the this partition share the same linear model $Y=f(X)$ where $f$ is a linear function.
+
+Explanation: FindMaxHomoOptimalPartitions(DataT,gamma)
+
+- INPUT: DataT$X[i,j] is the value of jth independent variable of ith individual. 
+- INPUT: DataT$Y[i] is the value of dependent variable of ith individual. 
+- INPUT: DataT$clsLayer[i,k] is the cluster label of ith individual in kth cluster layer.
+
+- OUTPUT: out$Copt[p,1] is equal to k implies that a cluster that is a pth member of the maximal homogeneous partition is at kth layer and the cluster name in kth layer is Copt[p,2]
+- OUTPUT: out$Copt[p,3] is "Model Information Reduction Ratio" of pth member of the maximal homogeneous partition: positive means the linear model is better than the null model.
+- OUTPUT: out$Copt[p,4] is $\eta( {C} )_{\text{cv}}$  of pth member of the maximal homogeneous partition. The greater Copt[p,4], the higher homogeneous degree of this cluster.
+- OUTPUT: out$models[[k]][[j]] is the linear regression model of jth cluster in kth layer.
+- OUTPUT: out$models[[k]][[j]]$clustInfoRecRatio is the "Cluster Information Reduction Ratio" between the jth cluster in kth layer and its children clusters in (k+1)th layer: positive means current cluster is better than its children clusters. Hence, we should keep this cluster at the member of maximal homogeneous partition instead of its children. 
+
+```{r}
+library(MRReg)
+
+# Generate simulation data type 4 by having 1000 individuals per homogeneous partition.
+DataT<-SimpleSimulation(1000,type=4)
+
+gamma <- 0.05 # Gamma parameter
+
+out<-FindMaxHomoOptimalPartitions(DataT,gamma)
+
+```
+
+#Plotting optimal homogeneous tree
+The red nodes are homogeneous partitions.
+All children of a homogeneous partition node share the same linear model.
+```{r}
+plotOptimalClustersTree(out)
+```
+
+#Printing optimal homogeneous partitions
+Selected features: 1 is reserved for an intercept, and d is a selected feature if Y[i] ~ X[i,d-1] in linear model
+```{r}
+PrintOptimalClustersResult(out, selFeature = TRUE)
+```
+

@@ -31,7 +31,7 @@ This function returns \code{Copt}, \code{models}, \code{nNodes},  \code{invOptCl
 
 \item{ \code{Copt[p,1]} }{ is equal to \code{k} implies a cluster that is a pth member of the maximal homogeneous partition is at kth layer and the cluster name in kth layer is \code{Copt[p,2]} }
 \item{ \code{Copt[p,3]} }{ is "Model Information Reduction Ratio" \code{I({C},H0,Hlin)} of \code{p}th member of the maximal homogeneous partition: positive means the linear model is better than the null model.}
-\item{ \code{Copt[p,4]} }{  is the squared correlation between predicted and real Y in CV step ( eta(C)cv ) of pth member of the maximal homogeneous partition. The greater \code{Copt[p,4]}, the higher homoheneous degree of this cluster.}
+\item{ \code{Copt[p,4]} }{  is the squared correlation between predicted and real Y in CV step ( eta(C)cv ) of pth member of the maximal homogeneous partition. The greater \code{Copt[p,4]}, the higher homogeneous degree of this cluster.}
 \item{ \code{ models[[k]][[j]]$clustInfoRecRatio} }{ is the "Cluster Information Reduction Ratio"  \code{I(Cj,Cjchildren,H)} between the \code{j}th cluster in \code{k}th layer
 and its children clusters in \code{(k+1)}th layer: positive means current cluster is better than its children clusters.
 Hence, we should keep this cluster at the member of maximal homogeneous partition instead of its children.}

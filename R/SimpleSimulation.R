@@ -3,8 +3,29 @@
 #'@description
 #' SimpleSimulation is a support function for generating multiresolution datasets.
 #'
-#'@param indvN is a number of individuals per cluster
+#' All simulation types have three layers except the type 4 has four layers.
+#'
+#' The type-1 simulation has all individuals belong to the same homogeneous partition in the first layer.
+#'
+#' The type-2 simulation has four homogeneous partitions in a second layer. Each partition has its own models.
+#'
+#' The type-3 simulation has eight homogeneous partitions in a third layer. Each partition has its own models
+#'
+#' The type-4 simulation has one homogeneous partition in a second layer, four homogeneous partitions in a third layer,
+#'  and eight homogeneous partitions in a fourth layer. Each partition has its own models
+#'
+#'
+#'@param indvN is a number of individuals per homogeneous partition.
 #'@param type is a type of simulation dataset. There are four types.
+#'
+#'@return The function returns a multiresolution dataset.
+#'\item{\code{DataT$X[i,d]} }{ is a value of feature \code{d} of individual \code{i} }
+#'\item{\code{DataT$Y[i]} }{ is value of target variable of individual \code{i} that
+#'  we want to fit \code{DataT$Y ~ DataT$X} in linear model}
+#'\item{\code{clsLayer[i,j]} }{ is a cluster ID of individual \code{i} at layer \code{j};
+#' \code{clsLayer[i,1]} is the first layer that everyone typically belongs to a single cluster. }
+#'\item{\code{DataT$TrueFeature[i]}}{ is equal to \code{d} if a true feature is \code{DataT$X[i,d-1]} that \code{DataT$Y[i]} is dependent with.
+#' Note that \code{d = 1} is reserved for the intercept value in a linear model. }
 #'
 #'@examples
 #'# Running SimpleSimulation to generate a dataset.
@@ -70,7 +91,7 @@ clusterSimpleGenT1Func <- function(indvN) {
   stdList<-c(1)
   dumDim<-19
   out<- LinearSimFunc(clsList,stdList,dumDim)
-  return(list("clsLayer"=clsLayer,"Y"=out$Y,"X"=out$mat,"cls"=out$cls))
+  return(list("clsLayer"=clsLayer,"Y"=out$Y,"X"=out$mat,"TrueFeature"=out$cls+1))
 }
 
 clusterSimpleGenT2Func <- function(indvN) {
@@ -95,7 +116,7 @@ clusterSimpleGenT2Func <- function(indvN) {
   stdList<-c(1,1,1,1)
   dumDim<-16
   out<- LinearSimFunc(clsList,stdList,dumDim)
-  return(list("clsLayer"=clsLayer,"Y"=out$Y,"X"=out$mat,"cls"=out$cls))
+  return(list("clsLayer"=clsLayer,"Y"=out$Y,"X"=out$mat,"TrueFeature"=out$cls+1))
 }
 
 clusterSimpleGenT3Func <- function(indvN) {
@@ -120,7 +141,7 @@ clusterSimpleGenT3Func <- function(indvN) {
   stdList<-c(1,1,1,1,1,1,1,1)
   dumDim<-12
   out<- LinearSimFunc(clsList,stdList,dumDim)
-  return(list("clsLayer"=clsLayer,"Y"=out$Y,"X"=out$mat,"cls"=out$cls))
+  return(list("clsLayer"=clsLayer,"Y"=out$Y,"X"=out$mat,"TrueFeature"=out$cls+1))
 }
 
 clusterSimpleGenT4Func <- function(indvN) {
@@ -133,6 +154,6 @@ clusterSimpleGenT4Func <- function(indvN) {
   clsLayer<-cbind(numeric(rN)+1,clsLayer)
   Y<-rbind(Data1$Y,Data2$Y,Data3$Y)
   X<-rbind(Data1$X,Data2$X,Data3$X)
-  cls<-rbind(Data1$cls,Data2$cls,Data3$cls)
-  return(list("clsLayer"=clsLayer,"Y"=Y,"X"=X,"cls"=cls))
+  TrueFeature<-rbind(Data1$TrueFeature,Data2$TrueFeature,Data3$TrueFeature)
+  return(list("clsLayer"=clsLayer,"Y"=Y,"X"=X,"TrueFeature"=TrueFeature))
 }
