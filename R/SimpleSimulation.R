@@ -12,7 +12,7 @@
 #' The type-3 simulation has eight homogeneous partitions in a third layer. Each partition has its own models
 #'
 #' The type-4 simulation has one homogeneous partition in a second layer, four homogeneous partitions in a third layer,
-#'  and eight homogeneous partitions in a fourth layer. Each partition has its own models
+#'  and eight homogeneous partitions in a fourth layer. Each partition has its own model.
 #'
 #'
 #'@param indvN is a number of individuals per homogeneous partition.

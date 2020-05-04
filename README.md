@@ -42,7 +42,7 @@ The type-2 simulation has four homogeneous partitions in a second layer. Each pa
 
 The type-3 simulation has eight homogeneous partitions in a third layer. Each partition has its own models
 
-The type-4 simulation has one homogeneous partition in a second layer, four homogeneous partitions in a third layer, and eight homogeneous partitions in a fourth layer. Each partition has its own models
+The type-4 simulation has one homogeneous partition in a second layer, four homogeneous partitions in a third layer, and eight homogeneous partitions in a fourth layer. Each partition has its own model.
 
 In this example, we use type-4 simulation.
 
