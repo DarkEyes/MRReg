@@ -7,14 +7,14 @@ MRReg: MDL Multiresolution Linear Regression Framework
 [![arXiv](https://img.shields.io/badge/cs.LG-arXiv%3A1907.05234-B31B1B.svg)](https://arxiv.org/abs/1907.05234/)
 [![License](https://img.shields.io/badge/License-MIT-orange.svg)](https://spdx.org/licenses/MIT.html)
 
- In this work, we provide the framework to analyze a multiresolution partition (e.g. country, provinces, subdisctrict) where each individual data point belongs to only one partition in each layer (e.g. $i$ belongs to subdistrict $A$, province $P$, and country $Q$).
+ In this work, we provide the framework to analyze multiresolution partitions (e.g. country, provinces, subdisctrict) where each individual data point belongs to only one partition in each layer (e.g. i belongs to subdistrict A, province P, and country Q).
 
 We assume that a partition in a higher layer subsumes lower-layer partitions (e.g. a nation is at the 1st layer subsumes all provinces at the 2nd layer). 
 
-Given $N$ individuals that have a pair of real values $(x,y)$ that generated from  independent variable $X$ and dependent variable $Y$.
-Each individual $i$ belongs to one partition per layer.
+Given N individuals that have a pair of real values (x,y) that generated from  independent variable X and dependent variable Y.
+Each individual i belongs to one partition per layer.
 
-Our goal is to find which partition at which highest level that all individuals  in the this partition share the same linear model $Y=f(X)$ where $f$ is a linear function.
+Our goal is to find which partition at which highest level that all individuals  in the this partition share the same linear model Y=f(X) where f is a linear function.
 
 
 Installation
