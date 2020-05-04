@@ -50,7 +50,7 @@ In this example, we use type-4 simulation.
 ```{r}
 library(MRReg)
 
-# Generate simulation data type 4 by having 1000 individuals per homogeneous partition.
+# Generate simulation data type 4 by having 100 individuals per homogeneous partition.
 DataT<-SimpleSimulation(100,type=4)
 
 gamma <- 0.05 # Gamma parameter
