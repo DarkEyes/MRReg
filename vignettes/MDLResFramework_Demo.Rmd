@@ -11,7 +11,7 @@ vignette: >
 
 MDL Multiresolution Linear Regression Framework
 ===============================================
-In this work, we provide the framework to analyze a multiresolution partition (e.g. country, provinces, subdisctrict) where each individual data point belongs to only one partition in each layer (e.g. $i$ belongs to subdistrict $A$, province $P$, and country $Q$).
+In this work, we provide the framework to analyze a multiresolution partition (e.g. country, provinces, subdistrict) where each individual data point belongs to only one partition in each layer (e.g. $i$ belongs to subdistrict $A$, province $P$, and country $Q$).
 
 We assume that a partition in a higher layer subsumes lower-layer partitions (e.g. a nation is at the 1st layer subsumes all provinces at the 2nd layer). 
 
@@ -35,8 +35,8 @@ Explanation: FindMaxHomoOptimalPartitions(DataT,gamma)
 ```{r}
 library(MRReg)
 
-# Generate simulation data type 4 by having 1000 individuals per homogeneous partition.
-DataT<-SimpleSimulation(1000,type=4)
+# Generate simulation data type 4 by having 100 individuals per homogeneous partition.
+DataT<-SimpleSimulation(100,type=4)
 
 gamma <- 0.05 # Gamma parameter
 
@@ -53,6 +53,7 @@ plotOptimalClustersTree(out)
 
 #Printing optimal homogeneous partitions
 Selected features: 1 is reserved for an intercept, and d is a selected feature if Y[i] ~ X[i,d-1] in linear model
+Note that the clustInfoRecRatio values are always NA for last-layer partitions.
 ```{r}
 PrintOptimalClustersResult(out, selFeature = TRUE)
 ```

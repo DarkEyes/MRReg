@@ -8,8 +8,10 @@ Authors@R:
            email = "grandca@gmail.com",
            comment = c(ORCID = "0000-0003-3131-0370"))
 Maintainer: Chainarong Amornbunchornvej <grandca@gmail.com>
-Description: What the package does (one paragraph). The publication of this package is at Chainarong Amornbunchornvej, Navaporn Surasvadi, Anon Plangprasopchok, and Suttipong Thajchayapong (2019) <arXiv:1907.05234>.
+Description: We provide the framework to analyze multiresolution partitions (e.g. country, provinces, subdistrict) where each individual data point belongs to only one partition in each layer (e.g. i belongs to subdistrict A, province P, and country Q).   We assume that a partition in a higher layer subsumes lower-layer partitions (e.g. a nation is at the 1st layer subsumes all provinces at the 2nd layer). Given N individuals that have a pair of real values (x,y) that generated from  independent variable X and dependent variable Y. Each individual i belongs to one partition per layer. Our goal is to find which partitions at which highest level that all individuals  in the these partitions share the same linear model Y=f(X) where f is a linear function. The framework deploys minimum description length principle (MDL) to infer solutions. The publication of this package is at Chainarong Amornbunchornvej, Navaporn Surasvadi, Anon Plangprasopchok, and Suttipong Thajchayapong (2019) <arXiv:1907.05234>.
 License: MIT + file LICENSE
+URL: https://github.com/DarkEyes/MRReg
+BugReports: https://github.com/DarkEyes/MRReg/issues
 Encoding: UTF-8
 LazyData: true
 Depends: 

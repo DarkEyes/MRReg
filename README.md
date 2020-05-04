@@ -7,15 +7,16 @@ MRReg: MDL Multiresolution Linear Regression Framework
 [![arXiv](https://img.shields.io/badge/cs.LG-arXiv%3A1907.05234-B31B1B.svg)](https://arxiv.org/abs/1907.05234/)
 [![License](https://img.shields.io/badge/License-MIT-orange.svg)](https://spdx.org/licenses/MIT.html)
 
- In this work, we provide the framework to analyze multiresolution partitions (e.g. country, provinces, subdisctrict) where each individual data point belongs to only one partition in each layer (e.g. i belongs to subdistrict A, province P, and country Q).
+In this work, we provide the framework to analyze multiresolution partitions (e.g. country, provinces, subdistrict) where each individual data point belongs to only one partition in each layer (e.g. i belongs to subdistrict A, province P, and country Q).
 
 We assume that a partition in a higher layer subsumes lower-layer partitions (e.g. a nation is at the 1st layer subsumes all provinces at the 2nd layer). 
 
 Given N individuals that have a pair of real values (x,y) that generated from  independent variable X and dependent variable Y.
 Each individual i belongs to one partition per layer.
 
-Our goal is to find which partition at which highest level that all individuals  in the this partition share the same linear model Y=f(X) where f is a linear function.
+Our goal is to find which partitions at which highest level that all individualsin the these partitions share the same linear model Y=f(X) where f is a linear function.
 
+The framework deploys minimum description length principle (MDL) to infer solutions.
 
 Installation
 ------------
@@ -28,10 +29,10 @@ remotes::install_github("DarkEyes/MRReg")
 ```
 This requires a user to install the "remotes" package before installing MRReg.
 
-Example: Inferred optimal homogeneous paritions
+Example: Inferred optimal homogeneous partitions
 ----------------------------------------------------------------------------------
 
-In the first step, we generate a simulatiuon dataset.
+In the first step, we generate a simulation dataset.
 
 All simulation types have three layers except the type 4 has four layers.
 
@@ -50,7 +51,7 @@ In this example, we use type-4 simulation.
 library(MRReg)
 
 # Generate simulation data type 4 by having 1000 individuals per homogeneous partition.
-DataT<-SimpleSimulation(1000,type=4)
+DataT<-SimpleSimulation(100,type=4)
 
 gamma <- 0.05 # Gamma parameter
 
@@ -78,48 +79,49 @@ PrintOptimalClustersResult(out, selFeature = TRUE)
 The result is below.
 ```{r}
 [1] "========== List of Optimal Clusters =========="
-[1] "Layer2,ClS-C1:modelInfoRecRatio=0.59, eta(C)cv=1.00"
+[1] "Layer2,ClS-C1:clustInfoRecRatio=0.08,modelInfoRecRatio=0.72, eta(C)cv=1.00"
 [1] "Selected features"
 [1] 2
-[1] "Layer3,ClS-C11:modelInfoRecRatio=0.74, eta(C)cv=1.00"
+[1] "Layer3,ClS-C11:clustInfoRecRatio=0.10,modelInfoRecRatio=0.63, eta(C)cv=1.00"
 [1] "Selected features"
 [1] 2
-[1] "Layer3,ClS-C12:modelInfoRecRatio=0.63, eta(C)cv=1.00"
+[1] "Layer3,ClS-C12:clustInfoRecRatio=0.10,modelInfoRecRatio=0.70, eta(C)cv=1.00"
 [1] "Selected features"
 [1] 3
-[1] "Layer3,ClS-C13:modelInfoRecRatio=0.74, eta(C)cv=1.00"
+[1] "Layer3,ClS-C13:clustInfoRecRatio=0.10,modelInfoRecRatio=0.68, eta(C)cv=1.00"
 [1] "Selected features"
 [1] 4
-[1] "Layer3,ClS-C14:modelInfoRecRatio=0.73, eta(C)cv=1.00"
+[1] "Layer3,ClS-C14:clustInfoRecRatio=0.09,modelInfoRecRatio=0.61, eta(C)cv=1.00"
 [1] "Selected features"
 [1] 5
-[1] "Layer4,ClS-C21:modelInfoRecRatio=0.74, eta(C)cv=1.00"
+[1] "Layer4,ClS-C21:clustInfoRecRatio=NA,modelInfoRecRatio=0.61, eta(C)cv=1.00"
 [1] "Selected features"
 [1] 2
-[1] "Layer4,ClS-C22:modelInfoRecRatio=0.72, eta(C)cv=1.00"
+[1] "Layer4,ClS-C22:clustInfoRecRatio=NA,modelInfoRecRatio=0.58, eta(C)cv=1.00"
 [1] "Selected features"
 [1] 3
-[1] "Layer4,ClS-C23:modelInfoRecRatio=0.59, eta(C)cv=1.00"
+[1] "Layer4,ClS-C23:clustInfoRecRatio=NA,modelInfoRecRatio=0.61, eta(C)cv=1.00"
 [1] "Selected features"
 [1] 4
-[1] "Layer4,ClS-C24:modelInfoRecRatio=0.73, eta(C)cv=1.00"
+[1] "Layer4,ClS-C24:clustInfoRecRatio=NA,modelInfoRecRatio=0.46, eta(C)cv=1.00"
 [1] "Selected features"
 [1] 5
-[1] "Layer4,ClS-C25:modelInfoRecRatio=0.70, eta(C)cv=1.00"
+[1] "Layer4,ClS-C25:clustInfoRecRatio=NA,modelInfoRecRatio=0.55, eta(C)cv=1.00"
 [1] "Selected features"
 [1] 6
-[1] "Layer4,ClS-C26:modelInfoRecRatio=0.72, eta(C)cv=1.00"
+[1] "Layer4,ClS-C26:clustInfoRecRatio=NA,modelInfoRecRatio=0.60, eta(C)cv=1.00"
 [1] "Selected features"
 [1] 7
-[1] "Layer4,ClS-C27:modelInfoRecRatio=0.69, eta(C)cv=1.00"
+[1] "Layer4,ClS-C27:clustInfoRecRatio=NA,modelInfoRecRatio=0.63, eta(C)cv=1.00"
 [1] "Selected features"
 [1] 8
-[1] "Layer4,ClS-C28:modelInfoRecRatio=0.74, eta(C)cv=1.00"
+[1] "Layer4,ClS-C28:clustInfoRecRatio=NA,modelInfoRecRatio=0.61, eta(C)cv=1.00"
 [1] "Selected features"
 [1] 9
 [1] "min eta(C)cv:1.000000"
 ```
-Note for selected features: 1 is reserved for an intercept, and d is a selected feature if Y[i] ~ X[i,d-1] in linear model
+Note for selected features: 1 is reserved for an intercept, and d is a selected feature if Y[i] ~ X[i,d-1] in linear model.
+Note that the clustInfoRecRatio values are always NA for last-layer partitions.
 
 Explanation: FindMaxHomoOptimalPartitions(DataT,gamma)
 ----------------------------------------------------------------------------------

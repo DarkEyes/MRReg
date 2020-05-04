@@ -184,7 +184,10 @@ PrintOptimalClustersResult<-function(resObj, selFeature= FALSE)
   for(i in seq(1,M))
   {
     clsName<-models[[Copt[i,1]]][[Copt[i,2]]]$clsName
-    print(sprintf("Layer%d,ClS-%s:modelInfoRecRatio=%.2f, eta(C)cv=%.2f",Copt[i,1],clsName,Copt[i,3],Copt[i,4]) )
+    clustInfoRecRatio<-models[[Copt[i,1]]][[Copt[i,2]]]$clustInfoRecRatio
+    if(is.null(clustInfoRecRatio))
+      clustInfoRecRatio<-NA
+    print(sprintf("Layer%d,ClS-%s:clustInfoRecRatio=%.2f,modelInfoRecRatio=%.2f, eta(C)cv=%.2f",Copt[i,1],clsName,clustInfoRecRatio,Copt[i,3],Copt[i,4]) )
     if(selFeature==TRUE)
     {
       print("Selected features")
