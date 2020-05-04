@@ -50,7 +50,7 @@ Then we plot the optimal homogeneous tree.
 plotOptimalClustersTree(out)
 ```
 The result is below.
-<img src="https://github.com/DarkEyes/EDOIF/blob/master/man/FIG/Htree.png" width="600">
+<img src="https://github.com/DarkEyes/MRReg/raw/master/man/FIG/Htree.png" width="600">
 
 The red nodes are homogeneous partitions.
 All children of a homogeneous partition node share the same linear model.
