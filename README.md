@@ -33,6 +33,19 @@ Example: Inferred optimal homogeneous paritions
 
 In the first step, we generate a simulatiuon dataset.
 
+All simulation types have three layers except the type 4 has four layers.
+
+The type-1 simulation has all individuals belong to the same homogeneous partition in the first layer.
+
+The type-2 simulation has four homogeneous partitions in a second layer. Each partition has its own models.
+
+The type-3 simulation has eight homogeneous partitions in a third layer. Each partition has its own models
+
+The type-4 simulation has one homogeneous partition in a second layer, four homogeneous partitions in a third layer, and eight homogeneous partitions in a fourth layer. Each partition has its own models
+
+In this example, we use type-4 simulation.
+
+
 ```{r}
 library(MRReg)
 
@@ -49,11 +62,12 @@ Then we plot the optimal homogeneous tree.
 ```{r}
 plotOptimalClustersTree(out)
 ```
-The result is below.
+
 <img src="https://github.com/DarkEyes/MRReg/raw/master/man/FIG/Htree.png" width="600">
 
 The red nodes are homogeneous partitions.
 All children of a homogeneous partition node share the same linear model.
+
 
 Lastly, we can print the result in text form.
 
