@@ -14,7 +14,7 @@ We assume that a partition in a higher layer subsumes lower-layer partitions (e.
 Given N individuals that have a pair of real values (x,y) that generated from  independent variable X and dependent variable Y.
 Each individual i belongs to one partition per layer.
 
-Our goal is to find which partitions at which highest level that all individualsin the these partitions share the same linear model Y=f(X) where f is a linear function.
+Our goal is to find which partitions at which highest level that all individuals in the these partitions share the same linear model Y=f(X) where f is a linear function.
 
 The framework deploys minimum description length principle (MDL) to infer solutions.
 
