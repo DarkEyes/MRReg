@@ -16,7 +16,7 @@ Each individual i belongs to one partition per layer.
 
 Our goal is to find which partitions at which highest level that all individuals in the these partitions share the same linear model Y=f(X) where f is a linear function.
 
-The framework deploys minimum description length principle (MDL) to infer solutions.
+The framework deploys the Minimum Description Length principle (MDL) to infer solutions.
 
 Installation
 ------------
