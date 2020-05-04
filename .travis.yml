@@ -1,0 +1,16 @@
+language: r
+cache: packages
+script:
+  - R CMD build . --compact-vignettes=both
+  - R CMD check *tar.gz --as-cran
+addons:
+  apt:
+    update: true
+    packages:
+      - libgs-dev
+      - qpdf
+      - ghostscript
+r:
+  - oldrel
+  - release
+  - devel
