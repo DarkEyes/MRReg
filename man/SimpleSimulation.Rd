@@ -4,12 +4,14 @@
 \alias{SimpleSimulation}
 \title{SimpleSimulation}
 \usage{
-SimpleSimulation(indvN = 10000, type = 1)
+SimpleSimulation(indvN = 10000, type = 1, degree = 2)
 }
 \arguments{
 \item{indvN}{is a number of individuals per homogeneous partition.}
 
 \item{type}{is a type of simulation dataset. There are four types.}
+
+\item{degree}{is a degree parameter of a polynomial function for type-5 simulation}
 }
 \value{
 The function returns a multiresolution dataset.
@@ -24,7 +26,7 @@ Note that \code{d = 1} is reserved for the intercept value in a linear model. }
 \description{
 SimpleSimulation is a support function for generating multiresolution datasets.
 
-All simulation types have three layers except the type 4 has four layers.
+All simulation types have three layers except the type 6 has four layers.
 
 The type-1 simulation has all individuals belong to the same homogeneous partition in the first layer.
 
@@ -34,6 +36,10 @@ The type-3 simulation has eight homogeneous partitions in a third layer. Each pa
 
 The type-4 simulation has one homogeneous partition in a second layer, four homogeneous partitions in a third layer,
 and eight homogeneous partitions in a fourth layer. Each partition has its own model.
+
+The type-5 simulation is similar to type-4 simulation but Y=h(X) is an exponential function.
+
+The type-6 simulation is similar to type-4 simulation but Y=h(X) is a polynomial function with \code{degree} parameter.
 }
 \examples{
 # Running SimpleSimulation to generate a dataset.

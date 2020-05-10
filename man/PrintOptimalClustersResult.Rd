@@ -11,6 +11,9 @@ PrintOptimalClustersResult(resObj, selFeature = FALSE)
 
 \item{selFeature}{is a flag. If it is true, then the function shows the selected feature(s) of each optimal cluster.}
 }
+\value{
+No return value, called for printing optimal clusters.
+}
 \description{
 PrintOptimalClustersResult is a support function for printing the optimal clusters from FindMaxHomoOptimalPartitions function.
 }

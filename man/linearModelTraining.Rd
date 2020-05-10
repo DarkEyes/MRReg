@@ -4,7 +4,14 @@
 \alias{linearModelTraining}
 \title{linearModelTraining}
 \usage{
-linearModelTraining(DataT, insigThs = 1e-08, alpha = 0.05)
+linearModelTraining(
+  DataT,
+  insigThs = 1e-08,
+  alpha = 0.05,
+  messageFlag = FALSE,
+  polyDegree = 1,
+  expFlag = FALSE
+)
 }
 \arguments{
 \item{DataT}{contains a multiresolution dataset s.t.
@@ -15,6 +22,14 @@ linearModelTraining(DataT, insigThs = 1e-08, alpha = 0.05)
 \item{insigThs}{is a threshold to determine whether a magnitude of a feature coefficient is enough so that the feature is designated as a selected feature.}
 
 \item{alpha}{is a significance level to determine whether a magnitude of a feature coefficient is enough so that the feature is designated as a selected feature.}
+
+\item{messageFlag}{is a flag. If it is true, the function shows the text regarding the progress of computing.}
+
+\item{polyDegree}{is a degree of polynomial function that is used to fit the data.
+If it is greater than 1, the polynomial formula is used in \code{lm()} instead of \code{"y=."}.}
+
+\item{expFlag}{is an exponential flag to control the formula for data fitting.
+If it is true, then the exp() formula is used in \code{lm()} instead of \code{"y=."}.}
 }
 \value{
 This function returns \code{models} and \code{DataT}.

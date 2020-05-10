@@ -8,6 +8,8 @@
 #'
 #'@param resObj is an object list, which is the output of FindMaxHomoOptimalPartitions function
 #'
+#'@return No return value, called for plotting the hierarchical tree of optimal clusters.
+#'
 #'@examples
 #'# Running FindMaxHomoOptimalPartitions using simulation data
 #' DataT<-SimpleSimulation(100,type=1)

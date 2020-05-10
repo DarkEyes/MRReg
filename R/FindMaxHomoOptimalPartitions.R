@@ -10,7 +10,12 @@
 #'@param gamma is a threshold to ...
 #'@param insigThs is a threshold to determine whether a magnitude of a feature coefficient is enough so that the feature is designated as a selected feature.
 #'@param alpha is a significance level to determine whether a magnitude of a feature coefficient is enough so that the feature is designated as a selected feature.
-#'@param minInvs is a minimum number of individuals for a cluster to be considered for inferring eta(C)cv, otherwise, eta(C)cv=0 .
+#'@param minInvs is a minimum number of individuals for a cluster to be considered for inferring eta(C)cv, otherwise, eta(C)cv=0.
+#'@param messageFlag is a flag. If it is true, the function shows the text regarding the progress of computing.
+#'@param polyDegree is a degree of polynomial function that is used to fit the data.
+#'If it is greater than 1, the polynomial formula is used in \code{lm()} instead of \code{"y=."}.
+#'@param expFlag is an exponential flag to control the formula for data fitting.
+#'If it is true, then the exp() formula is used in \code{lm()} instead of \code{"y=."}.
 #'
 #'@return This function returns \code{Copt}, \code{models}, \code{nNodes},  \code{invOptCls}, and \code{minR2cv}.
 #'
@@ -34,14 +39,14 @@
 #'
 #'@export
 #'
-FindMaxHomoOptimalPartitions<-function(DataT,gamma=0.05,insigThs=1e-8,alpha=0.05,minInvs=99)
+FindMaxHomoOptimalPartitions<-function(DataT,gamma=0.05,insigThs=1e-8,alpha=0.05,minInvs=99,polyDegree = 1,expFlag=FALSE, messageFlag=FALSE)
 {
   minR2cv<-Inf
   out<-dim(DataT$clsLayer)
   N<-out[[1]]
   nL<-out[[2]]
   Vc <-cbind(numeric(N),numeric(N)) # individual optimal clusters
-  out<-linearModelTraining(DataT,insigThs,alpha) # training the models
+  out<-linearModelTraining(DataT,insigThs,alpha,polyDegree=polyDegree,expFlag=expFlag,messageFlag=messageFlag) # training the models
   models<-out$models
   DataT<-out$DataT
 
@@ -51,7 +56,7 @@ FindMaxHomoOptimalPartitions<-function(DataT,gamma=0.05,insigThs=1e-8,alpha=0.05
 
     nCls<-length(models[[k]]) # number of cluster in ith layer
     currLayerList<- unique(DataT$clsLayer[,k])
-    cat("\014")
+    #message("\014")
     for(j in seq(1,nCls)) # search each cluster in the layer k
     {
 
@@ -110,7 +115,6 @@ FindMaxHomoOptimalPartitions<-function(DataT,gamma=0.05,insigThs=1e-8,alpha=0.05
             R2cv<-0
             clustInfoRecRatio<-0
           }
-          #         print(sprintf("R2cv:%f",R2cv))
           models[[k]][[j]]$R2cv<-R2cv
 
           # end cross-validation
@@ -133,13 +137,13 @@ FindMaxHomoOptimalPartitions<-function(DataT,gamma=0.05,insigThs=1e-8,alpha=0.05
           {
             R2cv<-0
           }
-          #         print(sprintf("R2cv:%f",R2cv))
           minR2cv<-min(c(minR2cv,R2cv))
           models[[k]][[j]]$R2cv<-R2cv
           Vc[inxFilterVec,1] <- k
           Vc[inxFilterVec,2] <- j
         }
-        print(sprintf("Calculating Layer%d,Cls%d:modelInfoRecRatio %f, R2cv %f",k,j,modelInfoRecRatio,R2cv))
+        if(messageFlag == TRUE)
+          message(sprintf("Calculating Layer%d,Cls%d:modelInfoRecRatio %f, R2cv %f",k,j,modelInfoRecRatio,R2cv))
       }
     }
   }
@@ -165,6 +169,8 @@ FindMaxHomoOptimalPartitions<-function(DataT,gamma=0.05,insigThs=1e-8,alpha=0.05
 #'@param resObj is an object list, which is the output of FindMaxHomoOptimalPartitions function
 #'@param selFeature is a flag. If it is true, then the function shows the selected feature(s) of each optimal cluster.
 #'
+#'@return No return value, called for printing optimal clusters.
+#'
 #'@examples
 #'# Running FindMaxHomoOptimalPartitions using simulation data
 #' DataT<-SimpleSimulation(100,type=1)
@@ -179,7 +185,7 @@ PrintOptimalClustersResult<-function(resObj, selFeature= FALSE)
   Copt<-resObj$Copt
   models<-resObj$models
   M<-dim(Copt)[1]
-  cat("\014")
+  #cat("\014")
   print("========== List of Optimal Clusters ==========")
   for(i in seq(1,M))
   {
@@ -195,6 +201,4 @@ PrintOptimalClustersResult<-function(resObj, selFeature= FALSE)
     }
   }
   print(sprintf("min eta(C)cv:%f",resObj$minR2cv))
-  #print(Copt)
-  #options( warn = 1 )
 }

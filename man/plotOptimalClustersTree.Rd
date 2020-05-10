@@ -9,6 +9,9 @@ plotOptimalClustersTree(resObj)
 \arguments{
 \item{resObj}{is an object list, which is the output of FindMaxHomoOptimalPartitions function}
 }
+\value{
+No return value, called for plotting the hierarchical tree of optimal clusters.
+}
 \description{
 plotOptimalClustersTree is a support function for plotting the hierarchical tree of optimal clusters
 from FindMaxHomoOptimalPartitions function.

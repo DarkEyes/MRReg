@@ -722,7 +722,8 @@ y[1]
 # Exp mixture model - as baseline method
 ```{r}
 library("flexmix")
-DataT<-clusterSimpleGenT4Func(10000)
+library(MRReg)
+DataT<-MRReg::SimpleSimulation(100,type=4)
 x<-DataT$X
 y<-DataT$Y
 getRMSEFromMixtureModel<-function(x,y,k)
@@ -762,17 +763,17 @@ getMixturePartitionFscore<-function(TrueClsVec,PredClsVec)
     inxVec<-TrueClsVec == trueCls
     predCls<-median(PredClsVec[inxVec])
     predInxVec<- PredClsVec == predCls
-    TP<- sum( predInxVec & inxVec) 
-    FP<- sum( predInxVec & ! inxVec) 
-    FN<- sum( !predInxVec & inxVec)
+    TP<- TP+ sum( predInxVec & inxVec) 
+    FP<- FP+sum( predInxVec & ! inxVec) 
+    FN<- FN+ sum( !predInxVec & inxVec)
   }
    prcVal<-TP/(TP+FP)
   recall<-TP/(TP+FN)
   Fscore<-2*(prcVal*recall)/(recall+prcVal)
   return(list("prcVal"=prcVal,"recall"=recall,"Fscore"=Fscore) )
 }
-#mixOut<-getRMSEFromMixtureModel(x,y,k=13)
-#getMixturePartitionFscore(DataT$cls,mixOut$clsVec)$Fscore
+mixOut<-getRMSEFromMixtureModel(x,y,k=13)
+getMixturePartitionFscore(DataT$TrueFeature,mixOut$clsVec)
 ```
 #Exp 100 mixture model 
 ```{r}
@@ -813,23 +814,23 @@ getMixturePartitionFscore<-function(TrueClsVec,PredClsVec)
 # print("Type2 Fin")
 # cat("\014")
 
-for(i in seq(1,100))
-{
-
-  DataT<-clusterSimpleGenT3Func(10000)
-  x<-DataT$X
-  y<-DataT$Y
-  mixOut<-getRMSEFromMixtureModel(x,y,k=8)
-
-  ResOut$S3RMSE[[i]]<-mixOut$RMSE
-  outMX<-getMixturePartitionFscore(DataT$cls,mixOut$clsVec)
-  ResOut$S3Fscore[[i]]<-outMX$Fscore
-  ResOut$S3pre[[i]]<-outMX$prcVal
-  ResOut$S3rec[[i]]<-outMX$recall
-  print(sprintf("Type3 #%d",i) )
-}
-print("Type3 Fin")
-cat("\014")
+# for(i in seq(1,100))
+# {
+# 
+#   DataT<-clusterSimpleGenT3Func(10000)
+#   x<-DataT$X
+#   y<-DataT$Y
+#   mixOut<-getRMSEFromMixtureModel(x,y,k=8)
+# 
+#   ResOut$S3RMSE[[i]]<-mixOut$RMSE
+#   outMX<-getMixturePartitionFscore(DataT$TrueFeature,mixOut$clsVec)
+#   ResOut$S3Fscore[[i]]<-outMX$Fscore
+#   ResOut$S3pre[[i]]<-outMX$prcVal
+#   ResOut$S3rec[[i]]<-outMX$recall
+#   print(sprintf("Type3 #%d",i) )
+# }
+# print("Type3 Fin")
+# cat("\014")
 
 for(i in seq(1,100))
 {
@@ -838,7 +839,7 @@ for(i in seq(1,100))
   x<-DataT$X
   y<-DataT$Y
   ResOut$S4RMSE[[i]]<-mixOut$RMSE
-  outMX<-getMixturePartitionFscore(DataT$cls,mixOut$clsVec)
+  outMX<-getMixturePartitionFscore(DataT$TrueFeature,mixOut$clsVec)
   ResOut$S4Fscore[[i]]<-outMX$Fscore
   ResOut$S4pre[[i]]<-outMX$prcVal
   ResOut$S4rec[[i]]<-outMX$recall
@@ -1008,3 +1009,18 @@ k=5
 save(ResOut,file="resOutData.RData")
 ```
 Test
+```{r}
+makePolyFormula<-function(df,degree=2)
+{
+   varnames <- paste("X", 1:dim(x)[2], sep="")
+   formularStr<-"y ~ "
+   for(i in seq(length(varnames)))
+   {
+     varnames[i]<-sprintf("poly(%s, degree = %d) ",varnames[i],degree)
+   }
+   
+   polyFormula <- as.formula(paste("y ~ ", paste(varnames, collapse= "+")))
+   return(polyFormula)
+}
+```
+
