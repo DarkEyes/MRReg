@@ -1,0 +1,1010 @@
+---
+title: "MDL Multiresolution Regression Framework"
+output: html_notebook
+---
+#To run the framework, please jump to "Code running block".
+
+
+#Simple simulation -> 4 types of layers 
+
+```{r}
+#clsList<-cbind(100,10)
+#stdList<-c(1,1.5)
+#dumDim<-5
+
+LinearSimFunc <- function(clsList,stdList,dumDim) {
+  totalDim <-length(clsList) + dumDim
+  totalRow <- sum(clsList)
+  mat<- matrix( rnorm(totalRow*totalDim,mean=0,sd=1), totalRow, totalDim) 
+  Y <-matrix(0, totalRow, 1)
+  cls<-matrix(0, totalRow, 1)
+  k<-1
+  for(i in seq(1, length(clsList), by = 1) )
+  {
+    n<-clsList[i]
+    const1<-runif(1, min=2, max=100)
+    for( j in seq(k,k+n-1) )
+    {
+      cls[j] <-i
+      Y[j]<- const1*mat[j,i]
+    }
+    k<-k+n
+  }
+  return(list("Y"=Y,"mat"=mat,"cls"=cls))
+}
+
+
+clusterSimpleGenT1Func <- function(indvN) {
+  N<-indvN*8
+  clsLayer<-matrix(1, N, 3)
+  nL2<-indvN*2
+  for (i in seq(1,4) ) # fill 2nd layer
+  {
+    st<-(i-1)*nL2+1
+    fn<-i*nL2
+    clsLayer[ st:fn, 2]<-i;
+    
+  }
+  for (i in seq(1,8) ) # fill 3nd layer
+  {
+    st<-(i-1)*indvN+1
+    fn<-i*indvN
+    clsLayer[ st:fn, 3]<-i;
+    
+  }
+  clsList<-cbind(N)
+  stdList<-c(1)
+  dumDim<-19
+  out<- LinearSimFunc(clsList,stdList,dumDim)
+  return(list("clsLayer"=clsLayer,"Y"=out$Y,"X"=out$mat,"cls"=out$cls))
+}
+
+clusterSimpleGenT2Func <- function(indvN) {
+  N<-indvN*8
+  clsLayer<-matrix(1, N, 3)
+  nL2<-indvN*2
+  for (i in seq(1,4) ) # fill 2nd layer
+  {
+    st<-(i-1)*nL2+1
+    fn<-i*nL2
+    clsLayer[ st:fn, 2]<-i;
+    
+  }
+  for (i in seq(1,8) ) # fill 3nd layer
+  {
+    st<-(i-1)*indvN+1
+    fn<-i*indvN
+    clsLayer[ st:fn, 3]<-i;
+    
+  }
+  clsList<-cbind(nL2,nL2,nL2,nL2)
+  stdList<-c(1,1,1,1)
+  dumDim<-16
+  out<- LinearSimFunc(clsList,stdList,dumDim)
+  return(list("clsLayer"=clsLayer,"Y"=out$Y,"X"=out$mat,"cls"=out$cls))
+}
+
+clusterSimpleGenT3Func <- function(indvN) {
+  N<-indvN*8
+  clsLayer<-matrix(1, N, 3)
+  nL2<-indvN*2
+  for (i in seq(1,4) ) # fill 2nd layer
+  {
+    st<-(i-1)*nL2+1
+    fn<-i*nL2
+    clsLayer[ st:fn, 2]<-i;
+    
+  }
+  for (i in seq(1,8) ) # fill 3nd layer
+  {
+    st<-(i-1)*indvN+1
+    fn<-i*indvN
+    clsLayer[ st:fn, 3]<-i;
+    
+  }
+  clsList<-cbind(indvN,indvN,indvN,indvN,indvN,indvN,indvN,indvN)
+  stdList<-c(1,1,1,1,1,1,1,1)
+  dumDim<-12
+  out<- LinearSimFunc(clsList,stdList,dumDim)
+  return(list("clsLayer"=clsLayer,"Y"=out$Y,"X"=out$mat,"cls"=out$cls))
+}
+
+clusterSimpleGenT4Func <- function(indvN) {
+  Data1<-clusterSimpleGenT1Func(indvN)
+  Data2<-clusterSimpleGenT2Func(indvN)
+  Data3<-clusterSimpleGenT3Func(indvN)
+  
+  clsLayer<-rbind(Data1$clsLayer,Data2$clsLayer+10,Data3$clsLayer+20)
+  rN<-dim(clsLayer)[1]
+  clsLayer<-cbind(numeric(rN)+1,clsLayer)
+  Y<-rbind(Data1$Y,Data2$Y,Data3$Y)
+  X<-rbind(Data1$X,Data2$X,Data3$X)
+  cls<-rbind(Data1$cls,Data2$cls+1,Data3$cls+5)
+  return(list("clsLayer"=clsLayer,"Y"=Y,"X"=X,"cls"=cls))
+}
+
+```
+END
+
+# Mapping Cluster
+
+```{r}
+remappingClusterInx<-function(clsLayer)
+{
+  nL<- dim(clsLayer)[2]
+  nIdv<-dim(clsLayer)[1]
+  nclsLayer<-matrix(1, nIdv, nL)
+  clsNameMappingTable<-list()
+  for(i in seq(1,nL))
+  {
+    currLayer<-clsLayer[,i]
+    currLayerList<-unique(currLayer)
+    #print(sprintf("rmmfunc L%d",i) )
+    #print(currLayerList)
+    for( j in seq(1,length(currLayerList)))
+    {
+      targetInxvec <-currLayer== currLayerList[j]
+      nclsLayer[targetInxvec,i] <-j
+    }
+    clsNameMappingTable[[i]]<-currLayerList
+  }
+  
+  return(list("nclsLayer"=nclsLayer,"clsNameMappingTable"=clsNameMappingTable))
+}
+```
+
+
+
+
+# Phase 1: training
+```{r}
+# setting
+linearModelTraining<-function(DataT)
+{
+  
+insigThs <- 1e-8
+alpha<- 0.05
+# ====================
+
+out1<-remappingClusterInx(DataT$clsLayer)
+DataT$clsLayer<-out1$nclsLayer
+DataT$clsNameMappingTable<-out1$clsNameMappingTable
+out<-dim(DataT$clsLayer)
+N<-out[[1]]
+nL<-out[[2]]
+models<-list()
+residualMat<-matrix(0,N,nL)
+nNodes <-0
+IDk<-1
+for(inx in seq(1,nL))
+{
+  currLayer<- DataT$clsLayer[,inx]
+  currLayerList<-unique(currLayer)
+  nCls<- length( currLayerList )
+  nNodes<-nNodes + nCls
+  submodels<-list()
+  for(inx2 in seq(1,nCls))
+  {
+    inxFilterVec<- currLayer == currLayerList[inx2]
+    x<-DataT$X[inxFilterVec,]
+    y<-DataT$Y[inxFilterVec,]
+    df = data.frame(y, x)
+    #===========================st Linear model
+    submodels[[inx2]] <- lm(y ~ ., data = df)
+    submodels[[inx2]] $ID<-IDk
+    IDk<-IDk +1
+    #===========================fn Linear model
+    if(inx<nL)
+      submodels[[inx2]]$ChildrenCls<- unique(DataT$clsLayer[inxFilterVec,inx+1])
+    else
+      submodels[[inx2]]$ChildrenCls<- NULL
+    
+    if(inx>1)
+    {
+      submodels[[inx2]]$ParentCls<- unique(DataT$clsLayer[inxFilterVec,inx-1])
+    }
+    else
+      submodels[[inx2]]$ParentCls<- NULL
+    
+    submodels[[inx2]]$optFlag<-FALSE
+    
+    SelectedFeatures<- summary(submodels[[inx2]])$coefficients[,4] < alpha
+    sigFeature<- abs(summary(submodels[[inx2]])$coefficient[,1])>insigThs
+    
+    SelectedFeatures<- SelectedFeatures & sigFeature 
+    selFeatureSet<-1:length(SelectedFeatures)
+    selFeatureSet<- selFeatureSet[SelectedFeatures]
+    submodels[[inx2]]$selFeatureSet<-selFeatureSet
+    
+    if(length(y)>1)
+      residualMat[inxFilterVec,inx] <- submodels[[inx2]]$residuals
+    else
+      residualMat[inxFilterVec,inx] <-sum(submodels[[inx2]]$residuals)
+    
+    submodels[[inx2]]$clsName<-sprintf("C%g",DataT$clsNameMappingTable[[inx]][[inx2]])
+    print(sprintf("Layer%d,Cls:%s",inx,submodels[[inx2]]$clsName))
+  }
+  
+  models[[inx]]<-submodels
+}
+  DataT$nNodes<-nNodes
+  return(list("models"=models,"DataT"=DataT))
+}
+```
+
+MDL
+```{r}
+realNumBits = 64
+insigThs = 1
+#============= NEW
+getRealStoreBits<-function(realVec)
+{
+  # getRealStoreBits(realVec)$realVecBits
+  normalizedRealVec<-realVec
+  normalizedRealVec[abs(normalizedRealVec)==insigThs]<-2 # for val = 1 need 2 bits
+  normalizedRealVec[abs(normalizedRealVec)<insigThs]<-1
+  realVecBits <- sum( ceiling(log2(abs(normalizedRealVec)) )+1)
+  return(list("realVecBits"=realVecBits))
+}
+
+getModelInfoRecRatio<-function(h1ResidualVec,h2ResidualVec,h1coeff,h2coeff)
+{
+  h1ResBits<-getRealStoreBits(h1ResidualVec)$realVecBits
+  h2ResBits<-getRealStoreBits(h2ResidualVec)$realVecBits
+  h1modelBits <- getRealStoreBits(h1coeff)$realVecBits
+  h2modelBits <- getRealStoreBits(h2coeff)$realVecBits
+  h1TotalBits <- (h1ResBits+h1modelBits )
+  h2TotalBits <- (h2ResBits+h2modelBits )
+  modelInfoRecBitsRatio<-(  h1TotalBits -  h2TotalBits )/h1TotalBits
+  return(list("modelInfoRecRatio"=modelInfoRecBitsRatio,"h1ResBits"=h1ResBits,"h2ResBits"=h2ResBits,"h1modelBits"=h1modelBits,"h2modelBits"=h2modelBits))
+}
+```
+
+
+Cross-validation part
+```{r}
+crossValEstFunc<-function(X,Y,clsInxVec)
+{
+  # X is a vector of independent vars, Y is a vector of a dependent var.
+  # clsInxVec is a vector of clustering indices of rows in X and Y.
+  # clsInxVec is always the local index vector!
+  
+  # return Coefficient of Determination R^2
+  clsVec<-unique(clsInxVec)
+  predY<-numeric(length(Y))
+  
+  #print(length(clsVec))
+  for(cls in clsVec)
+  {
+    # cls is the validate cluster and the rest are training part
+    currClsInx<-clsInxVec == cls
+    currReverseClsInx <- !currClsInx # training
+    
+    #print(sprintf("Cls%d, Length%d",cls,sum(currClsInx)))
+    
+    x<-X[currReverseClsInx,]
+    y<-Y[currReverseClsInx]
+    
+    df = data.frame(y, x)
+    
+    
+    model1<- lm(y ~ ., data = df)
+    
+    if(sum(currClsInx)!=1)
+    {
+      predYtmp<-predict(model1, data.frame(X[currClsInx,]) )
+    }
+    else
+      predYtmp<-0
+
+    predY[currClsInx]<-predYtmp
+  }
+  return(list("r2"=cor(Y,predY)^2))
+}
+
+crossVal10FoldEstFunc<-function(X,Y)
+{
+  # X is a vector of independent vars, Y is a vector of a dependent var.
+  # clsInxVec is a vector of clustering indices of rows in X and Y.
+  # clsInxVec is always the local index vector!
+  
+  # return Coefficient of Determination R^2
+  
+  train.control <- trainControl(method = "cv", number = 10)
+
+  x<-X
+  y<-Y
+  
+  df = data.frame(y, x)
+  
+  
+  model1 <- train(y ~., data = df, method = "lm",
+             trControl = train.control)
+
+  return(list("r2"=model1$results$Rsquared))
+}
+```
+
+
+New Main
+```{r}
+library(caret)
+FindMaxHomoPartition<-function(DataT,gamma)
+{
+minR2cv<-Inf
+out<-dim(DataT$clsLayer)
+N<-out[[1]]
+nL<-out[[2]]
+Vc <-cbind(numeric(N),numeric(N))
+out<-linearModelTraining(DataT)
+models<-out$models
+DataT<-out$DataT
+
+#options( warn = -1 )
+for(k in seq(1,nL))
+{
+  
+  nCls<-length(models[[k]]) # number of cluster in ith layer
+  currLayerList<- unique(DataT$clsLayer[,k])
+  cat("\014")
+  for(j in seq(1,nCls)) 
+  {
+     
+    inxFilterVec<-DataT$clsLayer[,k] == currLayerList[j] # selecting only members of jth cluster in ith layer
+    H0coeff<-mean(DataT$Y[inxFilterVec],na.rm = TRUE)
+    H0Residual<- DataT$Y[inxFilterVec]-H0coeff
+    H1coeff<-models[[k]][[j]]$coefficients
+    HlinResidual<-models[[k]][[j]]$residuals
+    
+    H0Residual[is.na(H0Residual)]<-0
+    H1coeff[is.na(H1coeff)]<-0
+    HlinResidual[is.na(HlinResidual)]<-0
+    
+    # positive modelInfoRecRatio  == H1 better than H0
+    modelInfoRecRatio<- getModelInfoRecRatio(H0Residual,HlinResidual,H0coeff,H1coeff)$modelInfoRecRatio
+    
+
+    models[[k]][[j]]$modelInfoRecRatio<-modelInfoRecRatio # modelInfoRecRatio>0 mean better than H0
+    if(min(Vc[inxFilterVec,1])==0 )
+    {
+      if(!is.null(models[[k]][[j]]$ChildrenCls))
+      {
+        HparentCoeff<-H1coeff
+        HparentResidual<-HlinResidual
+        HparentCoeff[is.na(HparentCoeff)]<-0
+        HparentResidual[is.na(HparentResidual)]<-0
+        
+        
+        HchildrenCoeff<-list()
+        HchildrenResidual<-list()
+        
+        
+        #======= cross-validation
+        clsInxVec<-DataT$clsLayer[inxFilterVec,k+1]
+        if(length(unique(clsInxVec))>1)
+        {
+          R2cv<-crossValEstFunc(DataT$X[inxFilterVec,],DataT$Y[inxFilterVec],clsInxVec)$r2
+          
+          for(chCls in models[[k]][[j]]$ChildrenCls)
+          {
+            HchildrenCoeff<-append(HchildrenCoeff,t(as.list(models[[k+1]][[chCls]]$coefficients)) )
+            HchildrenResidual<-append(HchildrenResidual,as.list(models[[k+1]][[chCls]]$residuals) )
+          }
+          HchildrenCoeff<-as.numeric(HchildrenCoeff)
+          HchildrenCoeff[is.na(HchildrenCoeff)]<-0
+          
+          HchildrenResidual<-as.numeric(HchildrenResidual)
+          HchildrenResidual[is.na(HchildrenResidual)]<-0
+          clustInfoRecRatio<- getModelInfoRecRatio(HchildrenResidual,HparentResidual,HchildrenCoeff,HparentCoeff)$modelInfoRecRatio
+          models[[k]][[j]]$clustInfoRecRatio<-clustInfoRecRatio
+        
+        }else
+        {
+          R2cv<-0
+          clustInfoRecRatio<-0
+        }
+#         print(sprintf("R2cv:%f",R2cv))
+        models[[k]][[j]]$R2cv<-R2cv
+        
+        # end cross-validation
+        
+        
+        if(clustInfoRecRatio >0 && R2cv>=gamma )
+        {
+          minR2cv<-min(c(minR2cv,R2cv))
+          Vc[inxFilterVec,1] <- k
+          Vc[inxFilterVec,2] <- j 
+        }
+    
+      }else # No child
+      {
+        if(sum(inxFilterVec)>100)
+        {
+          R2cv<-crossVal10FoldEstFunc(DataT$X[inxFilterVec,],DataT$Y[inxFilterVec])$r2
+        }
+        else
+        {
+          R2cv<-0
+        }
+#         print(sprintf("R2cv:%f",R2cv))
+        minR2cv<-min(c(minR2cv,R2cv))
+        models[[k]][[j]]$R2cv<-R2cv
+        Vc[inxFilterVec,1] <- k
+        Vc[inxFilterVec,2] <- j
+      }
+      print(sprintf("Calculating Layer%d,Cls%d:modelInfoRecRatio %f, R2cv %f",k,j,modelInfoRecRatio,R2cv))
+    }
+  }
+}
+
+Copt<-unique(Vc)
+M<-dim(Copt)[1]
+Copt<-cbind(Copt,numeric(M),numeric(M))
+for(j in seq(1,M))
+{
+  Copt[j,3] <- models[[Copt[j,1]]][[Copt[j,2]]]$modelInfoRecRatio
+  Copt[j,4] <- models[[Copt[j,1]]][[Copt[j,2]]]$R2cv
+}
+cat("\014") 
+print("========== List of Optimal Clusters ==========")
+for(i in seq(1,M))
+{
+  clsName<-models[[Copt[i,1]]][[Copt[i,2]]]$clsName
+  print(sprintf("Layer%d,ClS-%s:modelInfoRecRatio=%.2f, R2cv=%.2f",Copt[i,1],clsName,Copt[i,3],Copt[i,4]) )
+}
+print(sprintf("minR2cv:%f",minR2cv))
+#print(Copt)
+#options( warn = 1 )
+return(list("Copt"=Copt,"models"=models,"minR2cv"=minR2cv,"DataT"=DataT) )
+}
+
+```
+sss
+
+#Experimental code 1: Greedy algorithm
+```{r}
+greedyAlgo<-function(DataT,out)
+{
+N<-length(DataT$Y)
+flagVec<-logical(N)
+nL<-dim(DataT$clsLayer)[2]
+Vc <-cbind(numeric(N),numeric(N))
+mSquareErr<-list()
+sortVec<-list()
+sortCls<-list()
+l<-1
+for(k in seq(1,nL) )
+{
+  currLayer<-unique(DataT$clsLayer[,k])
+  layerMSquareErr<-list()
+  for(j in seq(1,length(currLayer) ) )
+  {
+    sortVec[[l]]<-mean(out$models[[k]][[j]]$residuals^2)
+    sortCls[[l]]<-c(j,k)
+    l=l+1
+  }
+  
+}
+sortVec<-as.numeric(sortVec)
+orderVec<-order(sortVec)
+
+for(i in orderVec)
+{
+  currCls<-sortCls[[i]]
+  mark<-unique(DataT$clsLayer[,currCls[2]])
+  inxVec<-DataT$clsLayer[,currCls[2]] == mark[currCls[1] ]
+  if(sum(flagVec[inxVec])==0)
+  {
+    flagVec[inxVec]<-TRUE
+    k<-currCls[2] # Layer
+    j<-currCls[1] # Cls in Layer
+    Vc[inxVec,1]<-k
+    Vc[inxVec,2]<-j
+    
+    print(sprintf("Greedy: Layer%d, cls%d",k,j) )
+    if(is.null(out$models[[k]][[j]]$R2cv))
+    {
+      inxFilterVec<-DataT$clsLayer[,k] == j # selecting only members of jth cluster in ith layer
+      out$models[[k]][[j]]$R2cv<- crossVal10FoldEstFunc(DataT$X[inxFilterVec,],DataT$Y[inxFilterVec])$r2
+    }
+  }
+}
+CoptGreedy<-unique(Vc)
+return(list("Copt"=CoptGreedy,"out"=out))
+}
+```
+
+#Evaluation parts
+```{r}
+# support function
+getResidualFromCopt<-function(Copt,models)
+{
+  M<-dim(Copt)[1]
+  residuals<-list()
+  for(i in seq(1,M))
+  {
+    residuals<-append(residuals,models[[Copt[i,1]]][[Copt[i,2]]]$residuals)
+  }
+  return(list("residuals"=as.numeric(residuals) ) )
+}
+getPartitionFscore<-function(TrueCopt,Copt,clsLayer)
+{
+  # TrueCopt[k,j] 
+
+  TrueCopt<-matrix(TrueCopt,ncol=2)
+  #Copt<-matrix(Copt,ncol=4)
+  N1<-dim(TrueCopt)[1]
+  N2<-dim(Copt)[1]
+  TrueFlag<-logical(N1)
+  PredFlag<-logical(N2)
+  Fscore<-0
+  TP<-0
+  FP<-0
+  FN<-0
+  
+  for(i1 in seq(1,N1))
+  {
+    currTrCls<-TrueCopt[i1,1:2]
+    for(i2 in seq(1,N2))
+    {
+      currPdCls<-Copt[i2,1:2]
+      if( sum(currTrCls ==currPdCls) ==2 ) # true cls is in pred cls set
+      {
+        TrueFlag[i1] = TRUE
+        PredFlag[i2] = TRUE
+        break
+      }
+    }
+  }
+  # Find true positive and false negative
+  for(i1 in seq(1,N1))
+  {
+    currTrCls<-TrueCopt[i1,1:2]
+    if(TrueFlag[i1]==TRUE)
+    {
+      TP<-TP+ sum(clsLayer[,currTrCls[1]] == currTrCls[2])
+    }
+    else
+    {
+      FN<-FN+ sum(clsLayer[,currTrCls[1]] == currTrCls[2]) 
+    }
+  }
+  # Find  false positive
+  for(i2 in seq(1,N2))
+  {
+    currPdCls<-Copt[i2,1:2]
+   # print(currPdCls)
+    if(PredFlag[i2]==FALSE)
+    {
+      FP<-FP+ sum(clsLayer[,currPdCls[1]] == currPdCls[2])
+    }
+  }
+  
+  prcVal<-TP/(TP+FP)
+  recall<-TP/(TP+FN)
+  Fscore<-2*(prcVal*recall)/(recall+prcVal)
+  return(list("prcVal"=prcVal,"recall"=recall,"Fscore"=Fscore))
+}
+
+```
+
+#Code running block: the framework execution chunk starts here!
+instruction
+- Please run all chunks above (Ctrl+Alt+P)
+- Then set the parameter below (Input: DataT and gamma)
+- Run all chunks below to start the framwork
+
+Explanation: FindMaxHomoPartition(DataT,gamma)
+- INPUT: DataT$X[i,j] is the value of jth independent variable of ith individual. 
+- INPUT: DataT$Y[i] is the value of dependent variable of ith individual. 
+- INPUT: DataT$clsLayer[i,k] is the cluster label of ith individual in kth cluster layer.
+
+- OUTPUT: Copt[p,1] is equal to k means a cluster that is a pth member of the maximal homogeneous partition is at kth layer and the cluster name in kth layer is Copt[p,2]
+- OUTPUT: Copt[p,3] is "Model Information Reduction Ratio" of pth member of the maximal homogeneous partition: positive means the linear model is better than the null model.
+- OUTPUT: Copt[p,4] is $$R^2(C)_{\text{cv}}$$  of pth member of the maximal homogeneous partition. The greater Copt[p,4], the higher homoheneous degree of this cluster.
+- OUTPUT: models[[k]][[j]] is the linear regression model of jth cluster in kth layer.
+- OUTPUT: models[[k]][[j]]$clustInfoRecRatio is the "Cluster Information Reduction Ratio" between the jth cluster in kth layer and its children clusters in (k+1)th layer: positive means current cluster is better than its children clusters. Hence, we should keep this cluster at the member of maximal homogeneous partition instead of its children. 
+```{r}
+#========= Test 
+
+# DataT<-clusterSimpleGenT1Func(10000)
+# DataT<-clusterSimpleGenT2Func(10000)
+# DataT<-clusterSimpleGenT3Func(10000)
+DataT<-clusterSimpleGenT4Func(10000) # Type of simulation datasets
+
+gamma <- 0.05 # Gamma parameter
+
+out<-FindMaxHomoPartition(DataT,gamma)
+out2<-greedyAlgo(out$DataT,out)
+CoptGreedy<-out2$Copt
+out<-out2$out
+
+OPTresiduals<-getResidualFromCopt(out$Copt,out$models)$residuals
+GreedyResiduals<-getResidualFromCopt(CoptGreedy,out$models)$residuals
+RegResiduals<-out$models[[1]][[1]]$residuals
+H0Residuals<-DataT$Y - mean(DataT$Y)
+cat("\014") 
+print(sprintf("OPT Residuals: RMSE=%g",sqrt(mean(OPTresiduals^2)) ))
+print(sprintf("Greedy Residuals: RMSE=%g",sqrt(mean(GreedyResiduals^2)) ))
+print(sprintf("Reg Residuals: RMSE=%g",sqrt(mean(RegResiduals^2)) ))
+print(sprintf("\bar{Y} Residuals: RMSE=%g",sqrt(mean(H0Residuals^2)) ))
+#FscoreOut<-getPartitionFscore(DataT$GrTHCopt,out$Copt,DataT$clsLayer)
+```
+
+TEST: iGraph output distplay
+```{r}
+library(igraph)
+adjMat<- matrix(0,out$DataT$nNodes,out$DataT$nNodes)
+nameList<-list()
+graphOPTflag<-logical()
+
+
+mainCOPT<-out$Copt
+nL<-length(out$models)
+k<-1
+optCount<-0
+
+
+
+
+for(i in seq(1,nL)) # ith Layer
+{
+  
+  # =============
+  flag1<-FALSE
+  if( is.element(i,mainCOPT[,1] ) ) # this layer contains opt?
+  {
+    inxVec<-mainCOPT[,1] == i
+    flag1<-TRUE
+
+  }
+  currLayer<- out$DataT$clsLayer[,i]
+  nCls<-length(unique(currLayer) )
+
+  for(j in seq(1,nCls)) # Nodes in ith layer
+  {
+    if(i>1) # build a graph
+    {
+      cID<-out$models[[i]][[j]]$ID
+      parentCls<-out$models[[i]][[j]]$ParentCls
+      pID<-out$models[[i-1]][[parentCls]]$ID
+      adjMat[cID,pID]<- 1
+      i
+    }
+
+    nameList[k]<-sprintf("L%dC%g",i,out$DataT$clsNameMappingTable[[i]][[j]])
+
+    if( flag1 )
+    {
+      
+      if(is.element(j,mainCOPT[inxVec,2])) # if found opt
+      {
+        graphOPTflag[k]<-TRUE
+
+        optCount<-optCount+1
+      }
+      else
+        graphOPTflag[k]<-FALSE
+    }
+    else
+      graphOPTflag[k]<-FALSE
+    k<-k+1
+  }
+}
+
+
+g1 <- graph_from_adjacency_matrix( adjMat   ) %>%
+  set_vertex_attr("label", value = nameList)
+
+
+V(g1)$color <- ifelse(graphOPTflag == TRUE, "red", "gray")
+
+#set_vertex_attr(g1,"label", value = nameList)
+V(g1)$label.cex = 0.8
+plot(g1, layout =  layout.auto,edge.arrow.size=0.25,vertex.label.color = "black")
+```
+#Mixture Model
+
+```{r}
+library("flexmix")
+#DataT<-clusterSimpleGenT4Func(10000)
+x<-DataT$X
+y<-DataT$Y
+df<- data.frame(y,x)
+m2<-flexmix(y~.,data = df, k=4, control = list(minprior=0.2) )
+predict(m2, data.frame( t(x[1,]) ) )
+y[1]
+
+
+
+
+```
+# Exp mixture model - as baseline method
+```{r}
+library("flexmix")
+DataT<-clusterSimpleGenT4Func(10000)
+x<-DataT$X
+y<-DataT$Y
+getRMSEFromMixtureModel<-function(x,y,k)
+{
+  df<- data.frame(y,x)
+  N<-length(y)
+  df<- data.frame(y,x)
+  mixmodel<-flexmix(y~.,data = df, k=k, control = list(minprior=0.02) )
+  yh<-predict(mixmodel, data.frame( (x) ) )
+  clsVec<-mixmodel@cluster
+  residuals<-list()
+  for(i in seq(1,N))
+  {
+    cls<-clsVec[i]
+    currResidual<- y[i] - yh[[cls]][i]
+    residuals<-append(residuals,currResidual)
+  }
+  RMSE<-sqrt(mean(as.numeric(residuals)^2))
+  return(list("clsVec"=clsVec, "RMSE"=RMSE) )
+}
+
+#mixOut<-getRMSEFromMixtureModel(x,y,k=4)
+#TrueClsVec<-DataT$cls
+#PredClsVec<-mixOut$clsVec
+getMixturePartitionFscore<-function(TrueClsVec,PredClsVec)
+{
+  # TrueCopt[k,j] 
+
+  TrueclsMembers<-unique(TrueClsVec)
+  M<-length(TrueclsMembers)
+  Fscore<-0
+  TP<-0
+  FP<-0
+  FN<-0
+  for(trueCls in TrueclsMembers)
+  {
+    inxVec<-TrueClsVec == trueCls
+    predCls<-median(PredClsVec[inxVec])
+    predInxVec<- PredClsVec == predCls
+    TP<- sum( predInxVec & inxVec) 
+    FP<- sum( predInxVec & ! inxVec) 
+    FN<- sum( !predInxVec & inxVec)
+  }
+   prcVal<-TP/(TP+FP)
+  recall<-TP/(TP+FN)
+  Fscore<-2*(prcVal*recall)/(recall+prcVal)
+  return(list("prcVal"=prcVal,"recall"=recall,"Fscore"=Fscore) )
+}
+#mixOut<-getRMSEFromMixtureModel(x,y,k=13)
+#getMixturePartitionFscore(DataT$cls,mixOut$clsVec)$Fscore
+```
+#Exp 100 mixture model 
+```{r}
+#ResOut<-list()
+# for(i in seq(1,100))
+# {
+#   
+#   DataT<-clusterSimpleGenT1Func(10000)
+#   x<-DataT$X
+#   y<-DataT$Y
+#   mixOut<-getRMSEFromMixtureModel(x,y,k=1)
+#   
+#   ResOut$S1RMSE[[i]]<-mixOut$RMSE
+#   outMX<-getMixturePartitionFscore(DataT$cls,mixOut$clsVec)
+#   ResOut$S1Fscore[[i]]<-outMX$Fscore
+#   ResOut$S1pre[[i]]<-outMX$prcVal
+#   ResOut$S1rec[[i]]<-outMX$recall
+#   print(sprintf("Type1 #%d",i) )
+#   
+# }
+# print("Type1 Fin")
+# cat("\014") 
+# for(i in seq(1,100))
+# {
+# 
+#   DataT<-clusterSimpleGenT2Func(10000)
+#   x<-DataT$X
+#   y<-DataT$Y
+#   mixOut<-getRMSEFromMixtureModel(x,y,k=4)
+# 
+#   ResOut$S2RMSE[[i]]<-mixOut$RMSE
+#   outMX<-getMixturePartitionFscore(DataT$cls,mixOut$clsVec)
+#   ResOut$S2Fscore[[i]]<-outMX$Fscore
+#   ResOut$S2pre[[i]]<-outMX$prcVal
+#   ResOut$S2rec[[i]]<-outMX$recall
+#   print(sprintf("Type2 #%d",i) )
+# }
+# print("Type2 Fin")
+# cat("\014")
+
+for(i in seq(1,100))
+{
+
+  DataT<-clusterSimpleGenT3Func(10000)
+  x<-DataT$X
+  y<-DataT$Y
+  mixOut<-getRMSEFromMixtureModel(x,y,k=8)
+
+  ResOut$S3RMSE[[i]]<-mixOut$RMSE
+  outMX<-getMixturePartitionFscore(DataT$cls,mixOut$clsVec)
+  ResOut$S3Fscore[[i]]<-outMX$Fscore
+  ResOut$S3pre[[i]]<-outMX$prcVal
+  ResOut$S3rec[[i]]<-outMX$recall
+  print(sprintf("Type3 #%d",i) )
+}
+print("Type3 Fin")
+cat("\014")
+
+for(i in seq(1,100))
+{
+  DataT<-clusterSimpleGenT4Func(10000)
+  mixOut<-getRMSEFromMixtureModel(x,y,k=13)
+  x<-DataT$X
+  y<-DataT$Y
+  ResOut$S4RMSE[[i]]<-mixOut$RMSE
+  outMX<-getMixturePartitionFscore(DataT$cls,mixOut$clsVec)
+  ResOut$S4Fscore[[i]]<-outMX$Fscore
+  ResOut$S4pre[[i]]<-outMX$prcVal
+  ResOut$S4rec[[i]]<-outMX$recall
+  print(sprintf("Type4 #%d",i) )
+}
+print("Type4 Fin")
+cat("\014")
+save(ResOut,file = "mixResout.rdata")
+```
+
+#Exp cal model Info.
+```{r}
+# support function
+Copt<-out$Copt
+models<-out$models
+clsLayer<-DataT$clsLayer
+#getclustInfoRecRatioFromCopt<-function(Copt,models,clsLayer)
+{
+  clsLayer<-remappingClusterInx(DataT$clsLayer)$nclsLayer
+  M<-dim(Copt)[1]
+  L<-length(models)
+
+  residuals<-list()
+  optR2cvList<-numeric(M)
+  underR2cvList<-numeric(0)
+  overR2cvList<-numeric(0)
+  for(i in seq(1,M))
+  {
+    k<-Copt[i,1]
+    j<-Copt[i,2]
+
+    inxVex<-clsLayer[,k] == j # selecting only members of jth cluster in ith layer
+      tmp<- crossVal10FoldEstFunc(DataT$X[inxVex,],DataT$Y[inxVex])$r2
+    optR2cvList[i]<-tmp
+    print(sprintf("j%d,k%d",j,k))
+    if(k>1)
+    {
+      for(nK in seq(1,k-1))
+      {
+         
+        parList<-unique(clsLayer[inxVex,nK])
+        for(nJ in parList)
+        {
+          print(sprintf("Under-nJ-%d,nK-%d",nJ,nK))
+          inxFilterVec<-clsLayer[,nK] == nJ # selecting only members of jth cluster in ith layer
+      tmp<- crossVal10FoldEstFunc(DataT$X[inxFilterVec,],DataT$Y[inxFilterVec])$r2
+          underR2cvList<-cbind(underR2cvList,tmp)
+        }
+      }
+    }
+    if(k<L)
+    {
+      for(nK in seq(k+1,L))
+      {
+        parList<-unique(clsLayer[inxVex,nK])
+        for(nJ in parList)
+        {
+          print(sprintf("over nK-%d,nJ-%d",nK,nJ) )
+
+          inxFilterVec<-clsLayer[,nK] == nJ # selecting only members of jth cluster in ith layer
+      tmp<- crossVal10FoldEstFunc(DataT$X[inxFilterVec,],DataT$Y[inxFilterVec])$r2
+          overR2cvList<-cbind(overR2cvList,tmp)
+        }
+        
+      }
+      
+    }
+    print("Fin")
+  }
+ # return(list("overclustInfoRecRatioList"=overclustInfoRecRatioList,"underclustInfoRecRatioList"=underclustInfoRecRatioList,  "optclustInfoRecRatioList"=optclustInfoRecRatioList) )
+}
+
+#out3<-getclustInfoRecRatioFromCopt(out$Copt,out$models,DataT$clsLayer)
+```
+
+#Real-data section
+```{r}
+ load("~/R/TestProject/Prov40DataPOP353K.RData")
+ DataT<-DataTProv40
+ gamma <- 0.05 # Gamma parameter
+out<-FindMaxHomoPartition(DataT,gamma)
+```
+
+#box plot
+```{r}
+n1<-length(underR2cvList)
+n2<-length(optR2cvList)
+n3<-length(overR2cvList)
+n<-n1+n2+n3
+mat <- cbind(underR2cvList,optR2cvList,overR2cvList)
+df <- data.frame(values = mat[1:n],  vars = rep(c("Underfitting","OPT","Overfitting"), times = c(n1,n2,n3)))
+boxplot(values ~ vars, data = df,main = "Homogeneneity degree of clusters",  xlab = "Cluster Type", ylab = "R2cv")
+```
+
+
+#Evaluation with 100 datasets per each type
+```{r}
+#load("~/R/TestProject/OneHundredData.RData")
+ResOut<-list()
+gamma <- 0.5
+k=1
+for(i in seq(1,100))
+{
+  
+  DataT<-DataS1[[i]]
+  
+  out<-FindMaxHomoPartition(DataT,gamma)
+  SCoptGreedy<-greedyAlgo(DataT,out)$Copt
+  
+  ResOut$S1OPTresiduals[[i]]<-getResidualFromCopt(out$Copt,out$models)$residuals
+  ResOut$S1GreedyResiduals[[i]]<-getResidualFromCopt(SCoptGreedy,out$models)$residuals
+  ResOut$S1RegResiduals[[i]]<-out$models[[1]][[1]]$residuals
+  ResOut$S1H0Residuals[[i]] <-DataT$Y - mean(DataT$Y)
+  ResOut$S1GreedyFscoreOut[[i]]<-getPartitionFscore( DataT1$GrTHCopt,SCoptGreedy,DataT$clsLayer)
+  ResOut$S1ourFscoreOut[[i]]<-getPartitionFscore( DataT1$GrTHCopt,out$Copt,DataT$clsLayer)
+}
+print("Type1 Fin")
+k=2
+for(i in seq(1,100))
+{
+  DataT<-DataS2[[i]]
+  
+  out<-FindMaxHomoPartition(DataT,gamma)
+  SCoptGreedy<-greedyAlgo(DataT,out)$Copt
+  
+  ResOut$S2OPTresiduals[[i]]<-getResidualFromCopt(out$Copt,out$models)$residuals
+  ResOut$S2GreedyResiduals[[i]]<-getResidualFromCopt(SCoptGreedy,out$models)$residuals
+  ResOut$S2RegResiduals[[i]]<-out$models[[1]][[1]]$residuals
+  ResOut$S2H0Residuals[[i]] <-DataT$Y - mean(DataT$Y)
+  ResOut$S2GreedyFscoreOut[[i]]<-getPartitionFscore( DataT2$GrTHCopt,SCoptGreedy,DataT$clsLayer)
+  ResOut$S2ourFscoreOut[[i]]<-getPartitionFscore( DataT2$GrTHCopt,out$Copt,DataT$clsLayer)
+}
+print("Type2 Fin")
+k=3
+for(i in seq(1,100))
+{
+  DataT<-DataS3[[i]]
+  
+  out<-FindMaxHomoPartition(DataT,gamma)
+  SCoptGreedy<-greedyAlgo(DataT,out)$Copt
+  
+  ResOut$S3OPTresiduals[[i]]<-getResidualFromCopt(out$Copt,out$models)$residuals
+  ResOut$S3GreedyResiduals[[i]]<-getResidualFromCopt(SCoptGreedy,out$models)$residuals
+  ResOut$S3RegResiduals[[i]]<-out$models[[1]][[1]]$residuals
+  ResOut$S3H0Residuals[[i]] <-DataT$Y - mean(DataT$Y)
+  ResOut$S3GreedyFscoreOut[[i]]<-getPartitionFscore( DataT3$GrTHCopt,SCoptGreedy,DataT$clsLayer)
+  ResOut$S3ourFscoreOut[[i]]<-getPartitionFscore( DataT3$GrTHCopt,out$Copt,DataT$clsLayer)
+}
+print("Type3 Fin")
+k=4
+for(i in seq(1,100))
+{
+  DataT<-DataS4[[i]]
+  
+  out<-FindMaxHomoPartition(DataT,gamma)
+  SCoptGreedy<-greedyAlgo(DataT,out)$Copt
+  
+  ResOut$S4OPTresiduals[[i]]<-getResidualFromCopt(out$Copt,out$models)$residuals
+  ResOut$S4GreedyResiduals[[i]]<-getResidualFromCopt(SCoptGreedy,out$models)$residuals
+  ResOut$S4RegResiduals[[i]]<-out$models[[1]][[1]]$residuals
+  ResOut$S4H0Residuals[[i]] <-DataT$Y - mean(DataT$Y)
+  ResOut$S4GreedyFscoreOut[[i]]<-getPartitionFscore( DataT4$GrTHCopt,SCoptGreedy,DataT$clsLayer)
+  ResOut$S4ourFscoreOut[[i]]<-getPartitionFscore( DataT4$GrTHCopt,out$Copt,DataT$clsLayer)
+}
+print("Type4 Fin")
+k=5
+save(ResOut,file="resOutData.RData")
+```
+Test
