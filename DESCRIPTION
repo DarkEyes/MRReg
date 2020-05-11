@@ -15,10 +15,10 @@ BugReports: https://github.com/DarkEyes/MRReg/issues
 Encoding: UTF-8
 LazyData: true
 Depends: 
-    R (>= 3.5.0)
+    R (>= 3.5.0),
+    caret
 Imports:
     igraph,
-    caret,
     ggplot2 (>= 3.0)
 Roxygen: list(markdown = TRUE)
 Suggests: knitr, rmarkdown
