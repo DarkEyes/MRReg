@@ -1,3 +1,6 @@
+# MRReg v0.1.2
+* Revise the import packages
+
 # MRReg v0.1.1
 * Add polynomial and exponential fitting and simulation
 * Revise the documents
