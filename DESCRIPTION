@@ -20,6 +20,6 @@ Depends:
 Imports:
     igraph
 Roxygen: list(markdown = TRUE)
-Suggests: knitr, rmarkdown
+Suggests: knitr, rmarkdown, markdown
 VignetteBuilder: knitr
 RoxygenNote: 7.1.1
