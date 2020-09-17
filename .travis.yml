@@ -11,6 +11,4 @@ addons:
       - qpdf
       - ghostscript
 r:
-  - oldrel
   - release
-  - devel
