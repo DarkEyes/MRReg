@@ -142,7 +142,7 @@ Chainarong Amornbunchornvej, Navaporn Surasvadi, Anon Plangprasopchok, and Sutti
 
 or
 
-Chainarong Amornbunchornvej, Navaporn Surasvadi, Anon Plangprasopchok, and Suttipong Thajchayapong (2021). Identifying Linear Models in Multi-Resolution Population Data using Minimum Description Length Principle to Predict Household Income. ACM Transactions on Knowledge Discovery from Data (TKDD), 15(2), 1-30. https://doi.org/10.1145/3424670  
+(Forthcoming) Chainarong Amornbunchornvej, Navaporn Surasvadi, Anon Plangprasopchok, and Suttipong Thajchayapong (2021). Identifying Linear Models in Multi-Resolution Population Data using Minimum Description Length Principle to Predict Household Income. ACM Transactions on Knowledge Discovery from Data (TKDD), 15(2), 1-30. https://doi.org/10.1145/3424670  
 
 Contact
 ----------------------------------------------------------------------------------
