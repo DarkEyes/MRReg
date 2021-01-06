@@ -3,6 +3,8 @@ title: "MDL Multiresolution Linear Regression Framework"
 output: html_notebook
 ---
 
+Edit: 07/24/2020 TKDD REV2
+
 #Code running block: the framework execution chunk starts here!
 instruction
 - Please run all chunks above (Ctrl+Alt+P)
@@ -72,10 +74,6 @@ df<- data.frame(y,x)
 m2<-flexmix(y~.,data = df, k=4, control = list(minprior=0.2) )
 predict(m2, data.frame( t(x[1,]) ) )
 y[1]
-
-
-
-
 ```
 # Exp mixture model - as baseline method
 ```{r}
@@ -143,5 +141,14 @@ RMSErowRes<-colMeans(RMSEtableRes)
 print("Finish")
 cat("\014")
 save(RMSEtableRes,F1tableRes,F1rowRes,RMSErowRes,file = sprintf("T%dResout.rdata",simType) )
+```
+
+#Data distribution
+```{r}
+#barplot(table(DataT$X),xlab="Value",ylab="Frequency")
+#barplot(table(DataT$Y),xlab="Value",ylab="Frequency")
+DataT<-SimpleSimulation(indvN = 100, type = 5)
+hist(DataT$X,xlab="Value",ylab="Frequency" ,main ="")
+hist(DataT$Y,xlab="Value",ylab="Frequency" ,main ="")
 ```
 
