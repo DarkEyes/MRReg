@@ -1,3 +1,6 @@
+# MRReg v0.1.3
+* Update citation
+
 # MRReg v0.1.2
 * Revise the import packages
 
