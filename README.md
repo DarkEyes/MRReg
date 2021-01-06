@@ -5,7 +5,7 @@ MRReg: MDL Multiresolution Linear Regression Framework
 [![CRAN Status Badge](https://www.r-pkg.org/badges/version-last-release/MRReg)](https://cran.r-project.org/package=MRReg)
 [![Download](https://cranlogs.r-pkg.org/badges/grand-total/MRReg)](https://cran.r-project.org/package=MRReg)
 [![arXiv](https://img.shields.io/badge/cs.LG-arXiv%3A1907.05234-B31B1B.svg)](https://arxiv.org/abs/1907.05234)
-[![](https://img.shields.io/badge/doi-10.1145%2F3424670 -yellow)](https://doi.org/10.1145/3424670)
+[![](https://img.shields.io/badge/doi-10.1145%2F3424670-yellow)](https://doi.org/10.1145/3424670)
 [![License](https://img.shields.io/badge/License-MIT-orange.svg)](https://spdx.org/licenses/MIT.html)
 
 In this work, we provide the framework to analyze multiresolution partitions (e.g. country, provinces, subdistrict) where each individual data point belongs to only one partition in each layer (e.g. i belongs to subdistrict A, province P, and country Q).
