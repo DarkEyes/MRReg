@@ -1,3 +1,6 @@
+# MRReg v0.1.4
+* Update lazy data setting
+
 # MRReg v0.1.3
 * Update citation
 
