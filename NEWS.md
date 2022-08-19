@@ -1,3 +1,6 @@
+# MRReg v0.1.5
+* Upgrade & revise some manual to comply the standard of HTML5 for documentation pages
+
 # MRReg v0.1.4
 * Update lazy data setting
 

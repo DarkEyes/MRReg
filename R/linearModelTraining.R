@@ -17,7 +17,7 @@
 #'
 #'@return This function returns \code{models} and \code{DataT}.
 #'
-#' \item{ \code{models[[j]][[k]]} }{ is a linear model of a cluster ID \code{k} at the layer \code{j}.
+#' \item{ models }{ \code{models[[j]][[k]]} is a linear model of a cluster ID \code{k} at the layer \code{j}.
 #'  The \code{models[[j]][[k]]$selFeatureSet} represents a set of selected-feature indices of the model where the feature index 1 is the intercept,
 #'   and the feature index \code{d} is the (d-1)th variable \code{DataT$X[,d-1]}. }
 #' \item{ DataT }{ is a \code{DataT} with \code{DataT$nNodes}, which is a number of total models from all layers. }

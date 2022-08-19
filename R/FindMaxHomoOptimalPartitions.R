@@ -19,16 +19,14 @@
 #'
 #'@return This function returns \code{Copt}, \code{models}, \code{nNodes},  \code{invOptCls}, and \code{minR2cv}.
 #'
-#' \item{ \code{Copt[p,1]} }{ is equal to \code{k} implies a cluster that is a pth member of the maximal homogeneous partition is at kth layer and the cluster name in kth layer is \code{Copt[p,2]} }
-#' \item{ \code{Copt[p,3]} }{ is "Model Information Reduction Ratio" \code{I({C},H0,Hlin)} of \code{p}th member of the maximal homogeneous partition: positive means the linear model is better than the null model.}
-#' \item{ \code{Copt[p,4]} }{  is the squared correlation between predicted and real Y in CV step ( eta(C)cv ) of pth member of the maximal homogeneous partition. The greater \code{Copt[p,4]}, the higher homogeneous degree of this cluster.}
-#' \item{ \code{ models[[k]][[j]]$clustInfoRecRatio} }{ is the "Cluster Information Reduction Ratio"  \code{I(Cj,Cjchildren,H)} between the \code{j}th cluster in \code{k}th layer
-#' and its children clusters in \code{(k+1)}th layer: positive means current cluster is better than its children clusters.
-#' Hence, we should keep this cluster at the member of maximal homogeneous partition instead of its children.}
-#' \item{ \code{models[[j]][[k]]} }{ is a linear model of a cluster ID \code{k} at the layer \code{j}.
+#' \item{ Copt }{  \code{Copt[p,1]} is equal to \code{k} implies a cluster that is a pth member of the maximal homogeneous partition is at kth layer and the cluster name in kth layer is \code{Copt[p,2]} \code{Copt[p,3]} is "Model Information Reduction Ratio" \code{I({C},H0,Hlin)} of \code{p}th member of the maximal homogeneous partition: positive means the linear model is better than the null model.
+#' Lastly,\code{Copt[p,4]} is the squared correlation between predicted and real Y in CV step ( eta(C)cv ) of pth member of the maximal homogeneous partition. The greater \code{Copt[p,4]}, the higher homogeneous degree of this cluster.}
+#' \item{ clustInfoRecRatio }{ \code{models[[k]][[j]]$clustInfoRecRatio} is the "Cluster Information Reduction Ratio"  \code{I(Cj,Cjchildren,H)} between the \code{j}th cluster in \code{k}th layer
+#' and its children clusters in \code{(k+1)}th layer: positive means current cluster is better than its children clusters. Hence, we should keep this cluster at the member of maximal homogeneous partition instead of its children.}
+#' \item{ models }{ \code{models[[j]][[k]]} is a linear model of a cluster ID \code{k} at the layer \code{j}.
 #'  The \code{models[[j]][[k]]$selFeatureSet} represents a set of selected-feature indices of the model where the feature index 1 is the intercept,
 #'   and the feature index \code{d} is the (d-1)th variable \code{DataT$X[,d-1]}. }
-#' \item{ \code{invOptCls[i,1]} }{ is the layer of optimal cluster of individual \code{i}. The optimal cluster of \code{i} is \code{invOptCls[i,2]}. }
+#' \item{invOptCls }{ \code{invOptCls[i,1]} is the layer of optimal cluster of individual \code{i}. The optimal cluster of \code{i} is \code{invOptCls[i,2]}. }
 #' \item{minR2cv}{ is the value of eta(C)cv from the cluster that has the lowest eta(C)cv.  }
 #' \item{DataT}{is an updated \code{DataT} with the helper variables for plotting and printing results.}
 #'
