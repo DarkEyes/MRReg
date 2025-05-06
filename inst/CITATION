@@ -1,8 +1,8 @@
 citHeader("To cite the 'MRReg' package in publications use:")
 
-citEntry(entry       = "article",
+bibentry(bibtype       = "article",
          title       = "Identifying Linear Models in Multi-Resolution Population Data using Minimum Description Length Principle to Predict Household Income.",
-         author      = personList(as.person("Chainarong Amornbunchornvej"),
+         author      = c(as.person("Chainarong Amornbunchornvej"),
                         as.person("Navaporn Surasvadi"),
                         as.person("Anon Plangprasopchok"),
                         as.person("Suttipong Thajchayapong")

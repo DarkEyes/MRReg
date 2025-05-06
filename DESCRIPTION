@@ -1,6 +1,6 @@
 Package: MRReg
 Title: MDL Multiresolution Linear Regression Framework
-Version: 0.1.5
+Version: 0.1.6
 Authors@R: 
     person(given = "Chainarong",
            family = "Amornbunchornvej",
@@ -22,4 +22,4 @@ Imports:
 Roxygen: list(markdown = TRUE)
 Suggests: knitr, rmarkdown, markdown
 VignetteBuilder: knitr
-RoxygenNote: 7.1.2
+RoxygenNote: 7.3.2
